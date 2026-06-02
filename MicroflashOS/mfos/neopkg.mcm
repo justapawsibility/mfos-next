@@ -1,0 +1,20 @@
+if "%1"=="list" (
+    echo Installed packages:
+    echo.
+    dir /a:-d /b "%pkgDir%/"
+    echo [mfpkg] INFO: listed installed packages >>"%logfile%"
+    goto :eof
+)
+if "%1"=="install" (
+    set /p "install=Package file to install: "
+    if not exist "%install%" (
+        echo Package file invalid!
+        goto :eof
+    )
+    copy "%install%" "%pkgDir%/"
+    echo Package installed!
+    goto :eof
+)
+echo Invalid arguments.
+echo [mfpkg] ERROR: invalid arguments >>"%logfile%"
+goto :eof

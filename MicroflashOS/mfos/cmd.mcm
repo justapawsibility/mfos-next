@@ -1,0 +1,32 @@
+:parser
+
+title Processing command...
+echo [cmd] INFO: received command "%input%" >>"%logfile%"
+
+:: Command whitelist
+
+set "cmdlist=about help clock clear reboot shutdown mkdir rename delete list cd home homewipe mfpkg mountsys modules toggles nuke dumper winflash mountvirt getargs getvars updater users cowsay"
+
+:: analysis with "for"
+
+for /f "tokens=1 delims= " %%a in ("%input%") do (set "command=%%a")
+
+echo [cmd] DEBUG: extracted main command "%command%" >>"%logfile%"
+
+:: compare %command% with command list
+
+echo [cmd] DEBUG: checking "%command%" against whitelist >>"%logfile%"
+
+set "found=nope"
+
+for %%w in (%cmdlist%) do (
+    if /i "%command%"=="%%w" set "found=yep"
+)
+if "%found%"=="nope" (
+    echo.
+    call :nocommand
+    goto :eof
+)
+echo.
+call :%input%
+goto :eof

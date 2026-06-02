@@ -1,0 +1,180 @@
+call :cmdok
+title File Manager
+
+:mkdir
+if "%1"=="" (
+    echo This command is used to make a directory.
+    echo.
+    echo Usage:
+    echo.
+    echo mkdir [directory]
+    echo [fsutils] ERROR: no directory provided >>"%logfile%"
+    goto :eof
+)
+if exist "%1/" (
+    echo Directory "%1" already exists!
+    echo [fsutils] ERROR: directory "%1" already exists >>"%logfile%"
+    goto :eof
+)
+mkdir "%1"
+if not exist "%1/" (
+    echo Failed to create directory "%1"!
+    echo [fsutils] ERROR: failed to create directory "%1" >>"%logfile%"
+    goto :eof
+)
+echo Created directory "%1"
+echo [fsutils] INFO: created directory "%1" >>"%logfile%"
+goto :eof
+
+:rename
+if "%1"=="" (
+    echo This command renames a file or a folder.
+    echo.
+    echo Usage:
+    echo.
+    echo rename [target] [new name]
+    echo [fsutils] ERROR: no option selected >>"%logfile%"
+    goto :eof
+)
+if not exist "%1" (
+    echo Target does not exist!
+    echo [fsutils] ERROR: target "%1" does not exist >>"%logfile%"
+    goto :eof
+)
+if exist "%2" (
+    echo An object with the same name is already present!
+    echo [fsutils] ERROR: new name "%2" matches an existing name >>"%logfile%"
+    goto :eof
+)
+ren "%1" "%2"
+if not exist "%2" (
+    echo Failed to rename "%1"!
+    echo [fsutils] ERROR: failed to rename "%1" >>"%logfile%"
+    goto :eof
+)
+echo Renamed "%1" to "%2"
+echo [fsutils] INFO: renamed "%1" to "%2" >>"%logfile%"
+goto :eof
+
+:delete
+if "%1"=="" (
+    echo This command deletes something.
+    echo.
+    echo Usage:
+    echo.
+    echo delete [file/directory] [name]
+    echo [fsutils] ERROR: no option selected >>"%logfile%"
+    goto :eof
+)
+if "%1"=="file" (
+    if not exist "%2" (
+        echo File does not exist!
+        echo [fsutils] ERROR: specified file "%2" does not exist >>"%logfile%"
+        goto :eof
+    )
+    del "%2" /f /q
+    if not exist "%2" (
+        echo Deleted file "%2"
+        echo [fsutils] INFO: deleted file "%2" >>"%logfile%"
+        goto :eof
+    )
+    echo Failed to delete file!
+    echo [fsutils] ERROR: failed to delete file "%2" >>"%logfile%"
+    goto :eof
+)
+if "%1"=="directory" (
+    if not exist "%2" (
+        echo Directory does not exist!
+        echo [fsutils] ERROR: specified directory "%2" does not exist >>"%logfile%"
+        goto :eof
+    )
+    rd "%2" /s /q
+    if not exist "%2/" (
+        echo Deleted directory "%2"
+        echo [fsutils] INFO: deleted directory "%2" >>"%logfile%"
+        goto :eof
+    )
+    echo Failed to delete directory!
+    echo [fsutils] ERROR: failed to delete directory "%1" >>"%logfile%"
+    goto :eof
+)
+echo Invalid arguments.
+echo [fsutils] ERROR: invalid arguments >>"%logfile%"
+goto :eof
+
+:list
+echo [fsutils] INFO: listing objects in "%cd%" >>"%logfile%"
+echo Directories:
+echo.
+dir /a:d /b
+echo.
+echo Files:
+echo.
+dir /a:-d /b
+goto :eof
+
+:cd
+if "%1"=="" (
+    echo This command is used to enter a directory or change your current directory.
+    echo.
+    echo Usage:
+    echo.
+    echo cd [path]
+    echo [fsutils] ERROR: no path provided >>"%logfile%"
+    goto :eof
+)
+if not exist "%1/" (
+    echo Directory invalid!
+    echo [fsutils] ERROR: invalid path >>"%logfile%"
+    goto :eof
+)
+cd "%1"
+echo Changed directory to "%1"
+echo [fsutils] INFO: changed directory to "%1" >>"%logfile%"
+echo [fsutils] DEBUG: current path is "%cd%" >>"%logfile%"
+goto :eof
+
+:home
+if not exist "%userDir%" (
+    echo.
+    echo Userdata for current user not found!
+    echo [fsutils] ERROR: could not find userdata for current user >>"%logfile%"
+    goto :eof
+)
+cd /d "%userDir%"
+echo Welcome home.
+echo [fsutils] INFO: reverted current path to home directory >>"%logfile%"
+echo [fsutils] DEBUG: current path is "%cd%" >>"%logfile%"
+goto :eof
+
+:homewipe
+echo This command wipes userdata for all users, both logged out and logged in.
+echo This effectively returns MicroflashOS to a "clean" state.
+echo Back up any data before continuing!
+echo.
+call :userauth
+if "%authorized%" == "true" (
+    echo.
+    if not exist "%disk0p2%" (
+        echo Userdata partition not found!
+        echo [fsutils] ERROR: could not load userdata partition >>"%logfile%"
+        goto :eof
+    )
+    echo Found users:
+    dir /a:d /b "%disk0p2%"
+    echo.
+    echo Wiping userdata...
+    cd /d "%disk0%"
+    rd "%userData%" /s /q
+    if exist "%disk0p2%" (
+        echo.
+        echo Userdata wipe failed!
+        echo [fsutils] ERROR: userdata partition wipe failed >>"%logfile%"
+        goto :eof
+    )
+    echo [fsutils] INFO: userdata wipe successful >>"%logfile%"
+    echo Wipe succeeded.
+    echo.
+    goto reboot
+)
+goto :eof

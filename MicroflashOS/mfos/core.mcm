@@ -1,0 +1,104 @@
+:help
+echo System utilities:
+echo.
+echo about: Show some system info
+echo updater: Update MicroflashOS to latest version on GitHub
+echo clock: Print current date and time
+echo clear: Clear console output
+echo.
+echo Power options:
+echo.
+echo reboot [recovery]: Reboot
+echo shutdown: Power off
+echo.
+echo [help] INFO: load help section for /%sysDir%/core.mcm >>"%logfile%"
+if exist "%disk0p1%\fsutils.mcm" (
+    echo File management:
+    echo.
+    echo mkdir [directory]: Create a directory
+    echo rename [target] [new name] Rename something to another thing
+    echo delete [file/directory] [name]: Delete a file/directory
+    echo list: List available files/directories
+    echo cd [path]: Change to a directory
+    echo.
+    echo User management
+    echo.
+    echo users [add/switch] [username]: Manage users in userdata partition
+    echo home: Quickly return to user directory
+    echo homewipe: Wipe all user directories
+    echo [help] INFO: load help section for /%sysDir%/fsutils.mcm >>"%logfile%"
+)
+if exist "%userMods%\devtools.mfm" (
+    echo.
+    echo Developer commands:
+    echo.
+    echo mountsys: Mount and modify system disk contents
+    echo modules: List all core and user modules
+    echo toggles [create/delete/enabled/list] [toggle]: Manage toggles
+    echo getargs [arguments]: Sanity check to analyse arguments passed
+    echo getvars: Print a list of ALL environment variables accessible
+    echo [help] INFO: load help section for /%sysDir%/%modsDir%/devtools.mfm >>"%logfile%"
+)
+if exist "%disk0p1%\mfpkg.mcm" (
+    echo.
+    echo Package management:
+    echo.
+    echo mfpkg [install/uninstall/list/available] [package ID]: Package management
+    echo mfpkg load [package]: Run an installed package
+    echo [help] INFO: load help section for /%sysDir%/mfpkg.mcm >>"%logfile%"
+)
+goto :eof
+
+:about
+echo MicroflashOS version: %mfosVer%
+echo [about] INFO: mfos version is %mfosVer% >>"%logfile%"
+if exist "%userMods%\devtools.mfm" (
+    if "%fbloaded%"=="yessir" (
+        echo F145HBR34K version: %fbVer%
+        echo [about] INFO: flashbreak version is %mfosVer% >>"%logfile%"
+    )
+)
+echo Mounted system disk: %disk0Label%
+echo [about] INFO: mounted system disk is %disk0Label% >>"%logfile%"
+echo.
+echo Hostname: %userdomain%
+echo [about] INFO: hostname is %userdomain% >>"%logfile%"
+echo Processor: %processor_identifier% (%NUMBER_OF_PROCESSORS% cores)
+echo [about] INFO: processor is %processor_identifier% with %NUMBER_OF_PROCESSORS% cores >>"%logfile%"
+echo Architecture: %processor_architecture%
+echo [about] INFO: architecture is %processor_architecture% >>"%logfile%"
+echo.
+echo Made by Kenneth White.
+if "%fbloaded%"=="yessir" (
+    echo Jailbreak by Team Centurion with help from Team Starburst.
+    echo Special thanks to nsp and the GigaflashOS devs!
+)
+goto :eof
+
+:clock
+echo Time: %time%
+echo Date: %date%
+echo [clock] INFO: fetched time is %time% and date is %date% >>"%logfile%"
+goto :eof
+
+:: Clear the shell
+
+:clear
+call :cmdok
+if not exist "%toggles%\noclear" (
+    cls
+    echo [cmd] INFO: user requested shell clearance >>"%logfile%"
+)
+goto :eof
+
+:users
+if "%2" == "add" (
+    set "user=%3"
+    set "enforcereboot=true"
+    goto :eof
+)
+if "%2" == "switch" (
+    set "user=%3"
+    set "enforcereboot=true"
+    goto :eof
+) else (echo Invalid. && goto :eof)
