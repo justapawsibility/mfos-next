@@ -91,7 +91,6 @@ if "%1"=="list" (
     echo.
     echo showdir: Shows current directory in command line before prompt
     echo incognito: Disables writing to the command history file
-    echo allowdisabled: Allow using disabled commands
     echo.
     echo Debugging tools:
     echo.

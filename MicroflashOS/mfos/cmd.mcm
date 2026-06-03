@@ -28,6 +28,9 @@ if "%found%"=="nope" (
     goto :eof
 )
 
+echo [cmd] INFO: command valid >>"%logfile%"
+if not exist "%toggles%/incognito" (echo [valid] "%input%" >>"%history%")
+
 echo.
 call :%input%
 goto :eof

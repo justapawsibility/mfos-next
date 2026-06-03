@@ -8,49 +8,6 @@ if "%1"=="list" (
     echo [mfpkg] INFO: listed installed packages >>"%logfile%"
     goto :eof
 )
-if "%1"=="install" (
-    if "%2"=="" (
-        echo No package ID specified.
-        echo [mfpkg] ERROR: no package ID specified >>"%logfile%"
-        goto :eof
-    )
-    set "pkgtarget=%2"
-    set "pkgcmd=mfpkg-dl-!pkgtarget!"
-    title Finding package...
-    set "pkgfound=false"
-    for /f "tokens=1 delims=:" %%A in ('findstr /r "^:" "%~f0"') do (
-        if /i "%%A"=="!pkgcmd!" set "pkgfound=true"
-    )
-    if "!pkgfound!"=="false" (
-        echo Package ID is invalid.
-        echo [mfpkg] ERROR: installation pID invalid >>"%logfile%"
-        goto :eof
-    )
-    set "pkgfound="
-    goto !pkgcmd!
-)
-if "%1"=="uninstall" (
-    if "%2"=="" (
-        echo No package ID specified.
-        echo [mfpkg] ERROR: no package ID specified >>"%logfile%"
-        goto :eof
-    )
-    set "pkgtarget=%2"
-    set "pkgcmd=mfpkg-rm-!pkgtarget!"
-    title Finding package...
-    set "pkgfound=false"
-    for /f "tokens=1 delims=:" %%A in ('findstr /r "^:" "%~f0"') do (
-        if /i "%%A"=="!pkgcmd!" set "pkgfound=true"
-    )
-    if "!pkgfound!"=="false" (
-        echo Package ID is invalid.
-        echo [mfpkg] ERROR: installation pID invalid >>"%logfile%"
-        goto :eof
-    )
-    set "pkgfound="
-    goto !pkgcmd!
-)
-
 if "%1"=="run"
     if "%2"=="" (
         echo Please enter a package name.

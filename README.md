@@ -3,15 +3,20 @@
 experimental build of [mfos](https://github.com/knbn1/mfos) 
 buggy and painful to debug
 
+best to treat this as a devkit for future development, it serves no practical use for end users
+
 pls open an issue or contact knb if you have any questions
 
 also i spent an eternity chasing impossible dreams :c
 
 ## differences to original
 
-all sysmodules and packages have been split off from the main batch file, allowing for more modular development
+sysmodules and packages have been split off from the main batch file, allowing for modular development
 
-SHIT WILL HIT THE FUCKING FAN if you try to run stuff from the old OS, port instructions coming soon! (or ill just port shit myself lmao)
+SHIT WILL HIT THE FUCKING FAN if you try to run stuff from the old OS
+(or ill just port shit myself lmao)
+
+also a lot of stuff from the old mfos is not present here like the updater and package installer stuff (some packages are bundled in here as a result)
 
 ## installing this
 
@@ -22,4 +27,8 @@ SHIT WILL HIT THE FUCKING FAN if you try to run stuff from the old OS, port inst
 
 ## developer notes
 
-COMING SOON!!
+porting 101
+
+- replace all the command endings with `goto :eof` (will add execdone in future)
+- remove all the dependency checks (everything that gotos `:nocommand` except maybe devtools checks)
+- uwu
