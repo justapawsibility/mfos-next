@@ -2,7 +2,6 @@
 echo System utilities:
 echo.
 echo about: Show some system info
-echo updater: Update MicroflashOS to latest version on GitHub
 echo clock: Print current date and time
 echo clear: Clear console output
 echo.
@@ -23,7 +22,6 @@ if exist "%disk0p1%\fsutils.mcm" (
     echo.
     echo User management
     echo.
-    echo users [add/switch] [username]: Manage users in userdata partition
     echo home: Quickly return to user directory
     echo homewipe: Wipe all user directories
     echo [help] INFO: load help section for /%sysDir%/fsutils.mcm >>"%logfile%"
@@ -35,7 +33,6 @@ if exist "%userMods%\devtools.mfm" (
     echo mountsys: Mount and modify system disk contents
     echo modules: List all core and user modules
     echo toggles [create/delete/enabled/list] [toggle]: Manage toggles
-    echo getargs [arguments]: Sanity check to analyse arguments passed
     echo getvars: Print a list of ALL environment variables accessible
     echo [help] INFO: load help section for /%sysDir%/%modsDir%/devtools.mfm >>"%logfile%"
 )
@@ -43,8 +40,8 @@ if exist "%disk0p1%\mfpkg.mcm" (
     echo.
     echo Package management:
     echo.
-    echo mfpkg [install/uninstall/list/available] [package ID]: Package management
-    echo mfpkg load [package]: Run an installed package
+    echo mfpkg [install/uninstall/list] [package ID]: Package management
+    echo mfpkg run [package]: Run an installed package
     echo [help] INFO: load help section for /%sysDir%/mfpkg.mcm >>"%logfile%"
 )
 goto :eof
@@ -52,12 +49,6 @@ goto :eof
 :about
 echo MicroflashOS version: %mfosVer%
 echo [about] INFO: mfos version is %mfosVer% >>"%logfile%"
-if exist "%userMods%\devtools.mfm" (
-    if "%fbloaded%"=="yessir" (
-        echo F145HBR34K version: %fbVer%
-        echo [about] INFO: flashbreak version is %mfosVer% >>"%logfile%"
-    )
-)
 echo Mounted system disk: %disk0Label%
 echo [about] INFO: mounted system disk is %disk0Label% >>"%logfile%"
 echo.
@@ -69,11 +60,17 @@ echo Architecture: %processor_architecture%
 echo [about] INFO: architecture is %processor_architecture% >>"%logfile%"
 echo.
 echo Made by Kenneth White.
-if "%fbloaded%"=="yessir" (
-    echo Jailbreak by Team Centurion with help from Team Starburst.
-    echo Special thanks to nsp and the GigaflashOS devs!
-)
 goto :eof
+
+:reboot
+set "enforcereboot=true"
+goto :eof
+
+:shutdown
+title Shutting down...
+echo Shutting down...
+echo [kernel] INFO: intercepted shutdown request >>"%logfile%"
+exit
 
 :clock
 echo Time: %time%
@@ -91,14 +88,4 @@ if not exist "%toggles%\noclear" (
 )
 goto :eof
 
-:users
-if "%2" == "add" (
-    set "user=%3"
-    set "enforcereboot=true"
-    goto :eof
-)
-if "%2" == "switch" (
-    set "user=%3"
-    set "enforcereboot=true"
-    goto :eof
-) else (echo Invalid. && goto :eof)
+

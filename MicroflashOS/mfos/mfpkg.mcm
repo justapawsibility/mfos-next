@@ -8,19 +8,6 @@ if "%1"=="list" (
     echo [mfpkg] INFO: listed installed packages >>"%logfile%"
     goto :eof
 )
-if "%1"=="available" (
-    echo Repository: %pkgRepo%
-    echo.
-    echo ID 001: MicroflashOS DevTools
-    echo ID 002: F145HBR34K jailbreak
-    echo ID 003: WinFlash Compatibility Layer
-    echo ID 004: nuke
-    echo ID 005: MicroflashOS Dumper
-    echo ID 006: Virtual System Disk Mounter
-    echo ID 007: cowsay
-    echo [mfpkg] INFO: showing details for repository "%pkgRepo%" >>"%logfile%"
-    goto :eof
-)
 if "%1"=="install" (
     if "%2"=="" (
         echo No package ID specified.
@@ -63,17 +50,23 @@ if "%1"=="uninstall" (
     set "pkgfound="
     goto !pkgcmd!
 )
-if "%1"=="load" (
-    if exist "%pkgDir%\%2.mfp" (
-        type "%pkgDir%\%2.mfp">"%devices%\mem\memsect2.bat"
-        call "%devices%\mem\memsect2.bat"
-    ) else (
-        echo Package not found!
+
+if "%1"=="run"
+    if "%2"=="" (
+        echo Please enter a package name.
+        goto :eof
     )
-    :: flush memory sector 2
-    echo.>"%devices%\mem\memsect2.bat"
+    if not exist "%pkgDir%\%2.mfp" (
+        echo Package not installed.
+        goto :eof
+    )
+    echo [cmd] INFO: package "%2.mfp" found, executing >>"%logfile%"
+    type "%pkgDir%\%2.mfp">"%exeCache%\mfp-%2.bat"
+    :: brute force arguments into this
+    call "%exeCache%\mfp-%2.bat" %3 %4 %5 %6 %7 %8 %9
     goto :eof
 )
+
 echo Invalid arguments.
 echo [mfpkg] ERROR: invalid arguments >>"%logfile%"
 goto :eof

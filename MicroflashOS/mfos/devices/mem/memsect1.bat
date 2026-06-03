@@ -1,12 +1,12 @@
 
 :parser
 
+:: whitelist
+
+set "cmdlist=about help clock clear reboot shutdown mkdir rename delete list cd home homewipe mfpkg mountsys modules toggles"
+
 title Processing command...
 echo [cmd] INFO: received command "%input%" >>"%logfile%"
-
-:: Command whitelist
-
-set "cmdlist=about help clock clear reboot shutdown mkdir rename delete list cd home homewipe mfpkg mountsys modules toggles nuke dumper winflash mountvirt getargs getvars updater users cowsay"
 
 :: analysis with "for"
 
@@ -28,6 +28,7 @@ if "%found%"=="nope" (
     call :nocommand
     goto :eof
 )
+
 echo.
 call :%input%
 goto :eof
@@ -35,7 +36,6 @@ goto :eof
 echo System utilities:
 echo.
 echo about: Show some system info
-echo updater: Update MicroflashOS to latest version on GitHub
 echo clock: Print current date and time
 echo clear: Clear console output
 echo.
@@ -56,7 +56,6 @@ if exist "%disk0p1%\fsutils.mcm" (
     echo.
     echo User management
     echo.
-    echo users [add/switch] [username]: Manage users in userdata partition
     echo home: Quickly return to user directory
     echo homewipe: Wipe all user directories
     echo [help] INFO: load help section for /%sysDir%/fsutils.mcm >>"%logfile%"
@@ -68,7 +67,6 @@ if exist "%userMods%\devtools.mfm" (
     echo mountsys: Mount and modify system disk contents
     echo modules: List all core and user modules
     echo toggles [create/delete/enabled/list] [toggle]: Manage toggles
-    echo getargs [arguments]: Sanity check to analyse arguments passed
     echo getvars: Print a list of ALL environment variables accessible
     echo [help] INFO: load help section for /%sysDir%/%modsDir%/devtools.mfm >>"%logfile%"
 )
@@ -76,8 +74,8 @@ if exist "%disk0p1%\mfpkg.mcm" (
     echo.
     echo Package management:
     echo.
-    echo mfpkg [install/uninstall/list/available] [package ID]: Package management
-    echo mfpkg load [package]: Run an installed package
+    echo mfpkg [install/uninstall/list] [package ID]: Package management
+    echo mfpkg run [package]: Run an installed package
     echo [help] INFO: load help section for /%sysDir%/mfpkg.mcm >>"%logfile%"
 )
 goto :eof
@@ -85,12 +83,6 @@ goto :eof
 :about
 echo MicroflashOS version: %mfosVer%
 echo [about] INFO: mfos version is %mfosVer% >>"%logfile%"
-if exist "%userMods%\devtools.mfm" (
-    if "%fbloaded%"=="yessir" (
-        echo F145HBR34K version: %fbVer%
-        echo [about] INFO: flashbreak version is %mfosVer% >>"%logfile%"
-    )
-)
 echo Mounted system disk: %disk0Label%
 echo [about] INFO: mounted system disk is %disk0Label% >>"%logfile%"
 echo.
@@ -102,11 +94,17 @@ echo Architecture: %processor_architecture%
 echo [about] INFO: architecture is %processor_architecture% >>"%logfile%"
 echo.
 echo Made by Kenneth White.
-if "%fbloaded%"=="yessir" (
-    echo Jailbreak by Team Centurion with help from Team Starburst.
-    echo Special thanks to nsp and the GigaflashOS devs!
-)
 goto :eof
+
+:reboot
+set "enforcereboot=true"
+goto :eof
+
+:shutdown
+title Shutting down...
+echo Shutting down...
+echo [kernel] INFO: intercepted shutdown request >>"%logfile%"
+exit
 
 :clock
 echo Time: %time%
@@ -124,17 +122,7 @@ if not exist "%toggles%\noclear" (
 )
 goto :eof
 
-:users
-if "%2" == "add" (
-    set "user=%3"
-    set "enforcereboot=true"
-    goto :eof
-)
-if "%2" == "switch" (
-    set "user=%3"
-    set "enforcereboot=true"
-    goto :eof
-) else (echo Invalid. && goto :eof)
+
 call :cmdok
 title File Manager
 
@@ -414,19 +402,6 @@ if "%1"=="list" (
     echo [mfpkg] INFO: listed installed packages >>"%logfile%"
     goto :eof
 )
-if "%1"=="available" (
-    echo Repository: %pkgRepo%
-    echo.
-    echo ID 001: MicroflashOS DevTools
-    echo ID 002: F145HBR34K jailbreak
-    echo ID 003: WinFlash Compatibility Layer
-    echo ID 004: nuke
-    echo ID 005: MicroflashOS Dumper
-    echo ID 006: Virtual System Disk Mounter
-    echo ID 007: cowsay
-    echo [mfpkg] INFO: showing details for repository "%pkgRepo%" >>"%logfile%"
-    goto :eof
-)
 if "%1"=="install" (
     if "%2"=="" (
         echo No package ID specified.
@@ -469,17 +444,129 @@ if "%1"=="uninstall" (
     set "pkgfound="
     goto !pkgcmd!
 )
-if "%1"=="load" (
-    if exist "%pkgDir%\%2.mfp" (
-        type "%pkgDir%\%2.mfp">"%devices%\mem\memsect2.bat"
-        call "%devices%\mem\memsect2.bat"
-    ) else (
-        echo Package not found!
+
+if "%1"=="run"
+    if "%2"=="" (
+        echo Please enter a package name.
+        goto :eof
     )
-    :: flush memory sector 2
-    echo.>"%devices%\mem\memsect2.bat"
+    if not exist "%pkgDir%\%2.mfp" (
+        echo Package not installed.
+        goto :eof
+    )
+    echo [cmd] INFO: package "%2.mfp" found, executing >>"%logfile%"
+    type "%pkgDir%\%2.mfp">"%exeCache%\mfp-%2.bat"
+    :: brute force arguments into this
+    call "%exeCache%\mfp-%2.bat" %3 %4 %5 %6 %7 %8 %9
     goto :eof
 )
+
 echo Invalid arguments.
 echo [mfpkg] ERROR: invalid arguments >>"%logfile%"
+goto :eof
+:: DevTools
+
+:mountsys
+title MicroflashOS System Partition Mounter
+if not exist "%disk0p1%/" (
+    echo System partition not found!
+    echo [mountsys] ERROR: system partition not found >>"%logfile%"
+    goto :eof
+)
+echo Mounting disk0p1...
+echo.
+cd /d "%disk0p1%/"
+echo [mountsys] INFO: mounted system partition >>"%logfile%"
+echo The system partition has been made accessible to the current user.
+echo.
+echo Modifying the system partition directly may break your device.
+echo Use with caution!
+goto :eof
+
+:modules
+echo [modules] INFO: listing installed modules... >>"%logfile%"
+echo Core modules:
+echo.
+dir /a:-d /b "%disk0p1%/"
+echo.
+echo User modules:
+echo.
+dir /a:-d /b "%userMods%/"
+goto :eof
+
+:toggles
+if "%1"=="" (
+    echo Manage your toggles.
+    echo.
+    echo Usage:
+    echo.
+    echo toggles [create/delete/enabled/list] [toggle]
+    echo [toggle-manager] ERROR: no option selected >>"%logfile%"
+    goto :eof
+)
+if "%1"=="create" (
+    if "%2"=="" (
+        echo Please enter a toggle name.
+        echo [toggle-manager] ERROR: no toggle specified >>"%logfile%"
+        goto :eof
+    )
+    echo "%2">"%toggles%/%2"
+    if not exist "%toggles%/%2" (
+        echo Failed to write toggle "%2"!
+        echo [toggle-manager] ERROR: could not write toggle "%2" >>"%logfile%"
+        echo.
+        goto :eof
+    )
+    echo Toggle "%2" written.
+    echo [toggle-manager] INFO: written toggle "%2" >>"%logfile%"
+    goto :eof
+)
+if "%1"=="delete" (
+    if "%2"=="" (
+        echo Please enter a toggle name.
+        echo [toggle-manager] ERROR: no toggle specified >>"%logfile%"
+        goto :eof
+    )
+    if not exist "%toggles%/%2" (
+        echo Toggle "%2" does not exist!
+        echo [toggle-manager] ERROR: toggle "%2" nonexistent >>"%logfile%"
+        goto :eof
+    )
+    del "%toggles%/%2" /f /q
+    if exist "%toggles%/%2" (
+        echo Failed to delete toggle "%2"!
+        echo [toggle-manager] ERROR: could not delete toggle "%2" >>"%logfile%"
+        goto :eof
+    )
+    echo Toggle "%2" deleted.
+    echo [toggle-manager] INFO: deleted toggle "%2" >>"%logfile%"
+    goto :eof
+)
+if "%1"=="enabled" (
+    echo Enabled toggles:
+    echo [toggle-manager] INFO: listing enabled toggles... >>"%logfile%"
+    echo.
+    dir /a:-d /b "%toggles%/"
+    goto :eof
+)
+if "%1"=="list" (
+    echo Toggles in MicroflashOS as of this version [%mfosVer%]:
+    echo [toggle-manager] INFO: listing available toggles... >>"%logfile%"
+    echo.
+    echo Tweaks:
+    echo.
+    echo showdir: Shows current directory in command line before prompt
+    echo incognito: Disables writing to the command history file
+    echo allowdisabled: Allow using disabled commands
+    echo.
+    echo Debugging tools:
+    echo.
+    echo slowboot: Add pauses during boot sequence
+    echo echoon: Disables echo OFF so command that generated shell output is shown
+    echo noclear: Disable clearing shell output (this also affects the "clear" command
+    echo nolog: Disables system logging functions within MicroflashOS
+    goto :eof
+)
+echo Invalid arguments!
+echo [toggle-manager] ERROR: invalid arguments >>"%logfile%"
 goto :eof

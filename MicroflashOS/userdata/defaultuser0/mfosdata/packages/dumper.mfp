@@ -1,0 +1,21 @@
+:dumper
+if not exist "%userMods%/devtools.mfm" (goto nodev)
+title MicroflashOS Dumper
+echo MicroflashOS Dumper by nsp
+echo.
+if exist "%disk0p1%" (
+  echo System disk mounted.
+  echo.
+  echo Dumping current MicroflashOS system disk to %mfosLocation%dump
+  echo.
+  xcopy "%disk0%" "%mfosLocation%dump\" /w /e /f
+  goto :eof
+)
+echo Could not find system disk. System may be corrupt.
+echo Please enter recovery mode to repair your system.
+goto :eof
+
+:nodev
+echo DevTools not found. Install pID 001.
+echo [cmd] ERROR: required dependency "DevTools" is missing >>"%logfile%"
+goto :eof

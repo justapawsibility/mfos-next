@@ -1,11 +1,11 @@
 :parser
 
+:: whitelist
+
+set "cmdlist=about help clock clear reboot shutdown mkdir rename delete list cd home homewipe mfpkg mountsys modules toggles"
+
 title Processing command...
 echo [cmd] INFO: received command "%input%" >>"%logfile%"
-
-:: Command whitelist
-
-set "cmdlist=about help clock clear reboot shutdown mkdir rename delete list cd home homewipe mfpkg mountsys modules toggles nuke dumper winflash mountvirt getargs getvars updater users cowsay"
 
 :: analysis with "for"
 
@@ -27,6 +27,7 @@ if "%found%"=="nope" (
     call :nocommand
     goto :eof
 )
+
 echo.
 call :%input%
 goto :eof

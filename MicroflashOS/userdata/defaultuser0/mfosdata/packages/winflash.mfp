@@ -1,0 +1,9 @@
+:winflash
+title WinFlash
+cls
+echo Type EXIT and press Enter to return to MicroflashOS.
+echo.
+echo [winflash] INFO: loading cmd.exe >>"%logfile%"
+cmd.exe
+echo [winflash] INFO: welcome back to mfos >>"%logfile%"
+goto :eof

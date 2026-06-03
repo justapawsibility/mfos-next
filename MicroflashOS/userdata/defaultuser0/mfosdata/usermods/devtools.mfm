@@ -1,0 +1,106 @@
+:: DevTools
+
+:mountsys
+title MicroflashOS System Partition Mounter
+if not exist "%disk0p1%/" (
+    echo System partition not found!
+    echo [mountsys] ERROR: system partition not found >>"%logfile%"
+    goto :eof
+)
+echo Mounting disk0p1...
+echo.
+cd /d "%disk0p1%/"
+echo [mountsys] INFO: mounted system partition >>"%logfile%"
+echo The system partition has been made accessible to the current user.
+echo.
+echo Modifying the system partition directly may break your device.
+echo Use with caution!
+goto :eof
+
+:modules
+echo [modules] INFO: listing installed modules... >>"%logfile%"
+echo Core modules:
+echo.
+dir /a:-d /b "%disk0p1%/"
+echo.
+echo User modules:
+echo.
+dir /a:-d /b "%userMods%/"
+goto :eof
+
+:toggles
+if "%1"=="" (
+    echo Manage your toggles.
+    echo.
+    echo Usage:
+    echo.
+    echo toggles [create/delete/enabled/list] [toggle]
+    echo [toggle-manager] ERROR: no option selected >>"%logfile%"
+    goto :eof
+)
+if "%1"=="create" (
+    if "%2"=="" (
+        echo Please enter a toggle name.
+        echo [toggle-manager] ERROR: no toggle specified >>"%logfile%"
+        goto :eof
+    )
+    echo "%2">"%toggles%/%2"
+    if not exist "%toggles%/%2" (
+        echo Failed to write toggle "%2"!
+        echo [toggle-manager] ERROR: could not write toggle "%2" >>"%logfile%"
+        echo.
+        goto :eof
+    )
+    echo Toggle "%2" written.
+    echo [toggle-manager] INFO: written toggle "%2" >>"%logfile%"
+    goto :eof
+)
+if "%1"=="delete" (
+    if "%2"=="" (
+        echo Please enter a toggle name.
+        echo [toggle-manager] ERROR: no toggle specified >>"%logfile%"
+        goto :eof
+    )
+    if not exist "%toggles%/%2" (
+        echo Toggle "%2" does not exist!
+        echo [toggle-manager] ERROR: toggle "%2" nonexistent >>"%logfile%"
+        goto :eof
+    )
+    del "%toggles%/%2" /f /q
+    if exist "%toggles%/%2" (
+        echo Failed to delete toggle "%2"!
+        echo [toggle-manager] ERROR: could not delete toggle "%2" >>"%logfile%"
+        goto :eof
+    )
+    echo Toggle "%2" deleted.
+    echo [toggle-manager] INFO: deleted toggle "%2" >>"%logfile%"
+    goto :eof
+)
+if "%1"=="enabled" (
+    echo Enabled toggles:
+    echo [toggle-manager] INFO: listing enabled toggles... >>"%logfile%"
+    echo.
+    dir /a:-d /b "%toggles%/"
+    goto :eof
+)
+if "%1"=="list" (
+    echo Toggles in MicroflashOS as of this version [%mfosVer%]:
+    echo [toggle-manager] INFO: listing available toggles... >>"%logfile%"
+    echo.
+    echo Tweaks:
+    echo.
+    echo showdir: Shows current directory in command line before prompt
+    echo incognito: Disables writing to the command history file
+    echo allowdisabled: Allow using disabled commands
+    echo.
+    echo Debugging tools:
+    echo.
+    echo slowboot: Add pauses during boot sequence
+    echo echoon: Disables echo OFF so command that generated shell output is shown
+    echo noclear: Disable clearing shell output (this also affects the "clear" command
+    echo nolog: Disables system logging functions within MicroflashOS
+    goto :eof
+)
+echo Invalid arguments!
+echo [toggle-manager] ERROR: invalid arguments >>"%logfile%"
+goto :eof

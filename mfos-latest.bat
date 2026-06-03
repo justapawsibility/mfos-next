@@ -6,9 +6,13 @@
 
 @echo off
 
+:: Define MicroflashOS Batch file location
+
+set "mfosLocation=%~dp0"
+
 :: Define some version strings
 
-set "mfosVer=2026.06.03"
+set "mfosVer=2026.06.04"
 set "fbVer=5.2"
 set "pkgRepo=GigaflashOS Unified Repository [Revision 3]"
 
@@ -28,18 +32,19 @@ set user=defaultuser0
 
 :bootstagezero
 
-cd /d "%~dp0"
+cd /d "%mfosLocation%"
 title MicroflashOS Bootloader
 
 :: System disk stuffs
 
-set "disk0=%~dp0%disk0Label%"
+set "disk0=%mfosLocation%%disk0Label%"
 set "disk0p1=%disk0%\%sysDir%"
 set "disk0p2=%disk0%\%userData%"
 
 :: Special directories
 
 set "devices=%disk0p1%\devices"
+set "exeCache=%devices%\mem\memsect2\execache"
 set "userDir=%disk0p2%\%user%"
 set "userSysDatadir=%userDir%\%userSysData%"
 set "toggles=%userSysDatadir%\toggles"
@@ -51,7 +56,7 @@ set "pkgMeta=%pkgDir%\installed"
 
 if exist "%toggles%\echoon" (@echo on)
 if not exist "%toggles%\noclear" (cls)
-if not exist "%toggles%\nolog" (set "logfile=%~dp0mfos-log.txt") else (set "logfile=NUL")
+if not exist "%toggles%\nolog" (set "logfile=%mfosLocation%mfos-log.txt") else (set "logfile=NUL")
 if not exist "%toggles%\incognito" (set "history=%userDir%/mfos-history.txt") else (set "history=NUL")
 
 :: Start logging
@@ -84,6 +89,24 @@ if exist "%disk0Label%" (
     goto bootfail
 )
 
+:: Version check
+
+set /p oldver=<"%disk0Label%/version.txt"
+echo.
+echo Checking version strings...
+echo.
+echo Bundled kernel: %mfosVer%
+echo Detected kernel: %oldver%
+echo.
+if "%oldver%" == "%mfosVer%" (
+    echo MicroflashOS is on the latest version!
+    echo [kernel] INFO: version string valid >>"%logfile%"
+) else (
+    echo Version mismatch!
+    echo [kernel] ERROR: expected "%mfosVer%" but got "%oldver%" >>"%logfile%"
+    goto bootfail
+)
+
 :: Boot process stage 1 - Initialize devices
 
 :bootstageone
@@ -100,40 +123,27 @@ echo.
 if not exist "%devices%" (cd /d "%disk0p1%" && md devices)
 if not exist "%devices%\mem" (cd /d "%devices%" && md mem)
 
-echo System disk - /%sysDir%/>"%devices%\disk0p1"
-if not exist "%devices%\disk0p1" (call :devinitfail disk0p1)
-echo INIT "disk0p1"
-echo [kdevinit] INFO: system partition initialized >>"%logfile%"
-
-:: insert redirector thing
+:: insert redirector thing to memsect1
 
 ::echo call %%1 >"%devices%/mem/memsect1.bat"
 ::echo goto :eof >>"%devices%/mem/memsect1.bat"
 
 echo.>"%devices%\mem\memsect1.bat"
 if not exist "%devices%\mem\memsect1.bat" (call :devinitfail memsect1)
-echo INIT "memsect1"
-echo [kdevinit] INFO: memory sector 1 initialized >>"%logfile%"
+call :devinitok memsect1
 
-echo Memory sector 2 - Userspace>"%devices%\mem\memsect2.bat"
-if not exist "%devices%\mem\memsect2.bat" (call :devinitfail memsect2)
-echo INIT "memsect2"
-echo [kdevinit] INFO: memory sector 2 initialized >>"%logfile%"
+cd /d "%devices%\mem"
+
+if not exist "%devices%\mem\memsect2" (md memsect2)
+if not exist "%devices%\mem\memsect2" (call :devinitfail memsect2)
+cd memsect2
+if not exist "%exeCache%" (mkdir execache)
+if not exist "%exeCache%" (call :devinitfail memsect2)
+call :devinitok memsect2
 
 echo Memory sector 3 - Secret Block>"%devices%\mem\memsect3"
 if not exist "%devices%\mem\memsect3" (call :devinitfail memsect3)
-echo INIT "memsect3"
-echo [kdevinit] INFO: memory sector 3 initialized >>"%logfile%"
-
-echo Human Interface Devices>"%devices%\hids"
-if not exist "%devices%\hids" (call :devinitfail hids)
-echo INIT "hids"
-echo [kdevinit] INFO: human interface devices initialized >>"%logfile%"
-
-echo Auditory devices: headphones, speakers, microphones, etc.>"%devices%\audio"
-if not exist "%devices%\audio" (call :devinitfail audio)
-echo INIT "audio"
-echo [kdevinit] INFO: audio subsystem initialized >>"%logfile%"
+call :devinitok memsect3
 
 if exist "%toggles%\slowboot" (call :slowboot)
 
@@ -183,10 +193,6 @@ if not exist "%disk0p2%" (
         goto pauseexit
     )
 )
-
-echo Userdata partition>"%devices%\disk0p2"
-echo Userdata partition is /%userData%/
-echo [kdevinit] INFO: userdata partition initialized >>"%logfile%"
 
 
 if not exist "%userDir%" (
@@ -264,56 +270,17 @@ if exist "%userDir%" (
     echo [kusrinit] INFO: logging in as %user% >>"%logfile%"
 )
 
-if exist "%toggles%\slowboot" (call :slowboot)
-echo.
-
 :: Load user modules
 
 for %%U in (flashbreak devtools) do (
     if exist "%userMods%\%%U.mfm" (
-        type "%disk0p1%\%%U.mfm" >>"%devices%\mem\memsect1.bat"
-        call :loadmodok /%userData%/%user%/%userSysData%/%modsDir%/%%U.mfm
+        echo.
+        type "%userMods%\%%U.mfm" >>"%devices%\mem\memsect1.bat"
+        call :loadmodok %%U.mfm
     )
 )
 
 if exist "%toggles%\slowboot" (call :slowboot)
-
-:: F145HBR34K stage 3 patcher
-
-:bootstagethree-fbpatch
-
-if exist "%userMods%\devtools.mfm" (
-    if exist "%userMods%\flashbreak.mfm" (
-        title F145HBR34K Stage 3 Intervention
-        echo.
-        echo Loading F145HBR34K...
-        echo [fb-s3init] INFO: loading jailbreak... >>"%logfile%"
-        echo.
-        set "fbloaded=nope"
-        echo [fb-s3init] INFO: loading module patches... >>"%logfile%"
-
-        for %%F in (cmd fsutils proctector) do (
-        if not exist "%disk0p1%\%%F.mcm" (call :fbpatchfail /%sysDir%/%%F.mfm)
-            echo Patching /%sysDir%/%%F.mcm
-            :: echo Injected F145HBR34K code into module.>"%disk0p1%\%%F.mcm"
-            echo [fb-s3init] INFO: patched /%sysDir%/%%F.mcm >>"%logfile%"
-        )
-
-        if not exist "%userMods%\devtools.mfm" (call :fbpatchfail /%userData%/%userSysData%/packages/devtools.mfm)
-
-        echo Patching /%sysDir%/%modsDir%/devtools.mfm
-        :: echo Injected F145HBR34K code into module.>"%userMods%\devtools.mfm"
-        echo [fb-s3init] INFO: patched /%userData%/%userSysData%/packages/devtools.mfm >>"%logfile%"
-        echo.
-        echo Patches complete!
-        echo [fb-s3init] INFO: patches complete >>"%logfile%"
-        echo.
-        set "fbloaded=yessir"
-        echo Resuming boot process...
-        echo [fb-s3init] INFO: resuming boot process >>"%logfile%"
-        if exist "%toggles%\slowboot" (call :slowboot)
-    )
-)
 
 :: Boot process complete!
 
@@ -334,7 +301,7 @@ echo.
 if not exist "%disk0p1%\cmd.mcm" (
     echo [kernel] ERROR: could not load /%sysDir%/cmd.mcm >>"%logfile%"
     echo Command line could not be loaded.
-    goto :pauseexit
+    goto pauseexit
 )
 echo Welcome to MicroflashOS!
 echo [cmd] INFO: initialized prompt >>"%logfile%"
@@ -343,7 +310,7 @@ if not exist "%userDir%" (
     echo Userdata for user %user% not found.
     echo [kusrinit] ERROR: no userdata for user %user% >>"%logfile%"
     echo.
-    goto reboot
+    goto pauseexit
 )
 echo Logged in as %user%
 echo [cmd] INFO: current user: %user% >>"%logfile%"
@@ -366,7 +333,7 @@ if not exist "%disk0p1%\cmd.mcm" (
 if "%enforcereboot%" == "true" (
     set "enforcereboot=false"
     echo The system will now reboot.
-    call "%devices%\mem\memsect1.bat" halt
+    call :halt
     title Rebooting...
     echo [kernel] INFO: intercepted reboot request >>"%logfile%"
     goto bootstagezero
@@ -404,6 +371,8 @@ set /p "input=%user%@%userdomain%: "
 
 if "%input%" == getvars (set)
 
+:: let memsect1 deal with it
+
 call "%devices%\mem\memsect1.bat"
 
 goto prompt
@@ -413,16 +382,18 @@ goto prompt
 :bootfail
 echo.
 title Startup Failure!
-echo MicroflashOS startup failed. Entering recovery...
-call :halt
-echo [kernel] INFO: booting to recovery... >>"%logfile%"
-echo [kernel] INFO: booting to recovery...
-goto recovery
+echo MicroflashOS startup failed.
+goto pauseexit
 
 :devinitfail
-echo [kdevinit] ERROR: failed to initialize "%1" >>"%logfile%"
 echo Could not initialize device "%1"
+echo [kdevinit] ERROR: failed to initialize "%1" >>"%logfile%"
 goto pauseexit
+
+:devinitok
+echo Initialized %1
+echo [kdevinit] INFO: %1 initialized >>"%logfile%"
+goto :eof
 
 :loadmodok
 echo Loaded %1
@@ -449,10 +420,15 @@ call :halt
 echo [bootloader] DEBUG: slowboot toggle tripped >>"%logfile%"
 goto :eof
 
+:: Common pause and exit functions
+
+:pauseexit
+call :halt
+exit
+
 :halt
 echo.
 pause
 goto :eof
-
 
 
