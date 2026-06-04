@@ -14,7 +14,6 @@ also i spent an eternity chasing impossible dreams :c
 sysmodules and packages have been split off from the main batch file, allowing for modular development
 
 SHIT WILL HIT THE FUCKING FAN if you try to run stuff from the old OS
-(or ill just port shit myself lmao)
 
 also a lot of stuff from the old mfos is not present here like the updater and package installer stuff (some packages are bundled in here as a result)
 
@@ -27,8 +26,11 @@ also a lot of stuff from the old mfos is not present here like the updater and p
 
 ## developer notes
 
-porting 101
+porting for dumdumz
 
-- replace all the command endings with `goto :eof` (will add execdone in future)
+- replace all the command "endings" with `goto :eof` (will add execdone in future)
 - remove all the dependency checks (everything that gotos `:nocommand` except maybe devtools checks)
+- packages will need to bundle their own shit instead of relying on `compact.mcm` consolidations (to be fixed!!)
+- `%~dp0` needs to be changed to `%mfosLocation%` wherever used
+- reboots MUST be indirectly called via `set enforcereboot=true && goto :eof`
 - uwu
