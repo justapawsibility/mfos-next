@@ -1,5 +1,4 @@
-call :cmdok
-title File Manager
+:: MicroflashOS Filesystem Toolkit [fsutils.mcm]
 
 :mkdir
 if "%1"=="" (
@@ -175,6 +174,7 @@ if "%authorized%" == "true" (
     echo [fsutils] INFO: userdata wipe successful >>"%logfile%"
     echo Wipe succeeded.
     echo.
-    goto reboot
+    set "enforcereboot=true"
+    goto :eof
 )
 goto :eof

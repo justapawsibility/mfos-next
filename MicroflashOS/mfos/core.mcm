@@ -1,3 +1,5 @@
+:: MicroflashOS Core Utilities [core.mcm]
+
 :help
 echo System utilities:
 echo.
@@ -78,14 +80,9 @@ echo Date: %date%
 echo [clock] INFO: fetched time is %time% and date is %date% >>"%logfile%"
 goto :eof
 
-:: Clear the shell
-
 :clear
-call :cmdok
 if not exist "%toggles%\noclear" (
     cls
     echo [cmd] INFO: user requested shell clearance >>"%logfile%"
 )
 goto :eof
-
-

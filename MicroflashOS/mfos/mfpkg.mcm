@@ -1,6 +1,7 @@
+:: MicroflashOS Package Manager [mfpkg.mcm]
+
 :mfpkg
 title MicroflashOS Package Manager
-setlocal enabledelayedexpansion
 if "%1"=="list" (
     echo Installed packages:
     echo.

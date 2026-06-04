@@ -12,7 +12,7 @@ set "mfosLocation=%~dp0"
 
 :: Define some version strings
 
-set "mfosVer=2026.06.04"
+set "mfosVer=2026.06.05"
 set "fbVer=5.2"
 set "pkgRepo=GigaflashOS Unified Repository [Revision 3]"
 
@@ -128,7 +128,7 @@ if not exist "%devices%\mem" (cd /d "%devices%" && md mem)
 ::echo call %%1 >"%devices%/mem/memsect1.bat"
 ::echo goto :eof >>"%devices%/mem/memsect1.bat"
 
-echo.>"%devices%\mem\memsect1.bat"
+echo ^:^: Memory Sector 1 >"%devices%\mem\memsect1.bat"
 if not exist "%devices%\mem\memsect1.bat" (call :devinitfail memsect1)
 call :devinitok memsect1
 
@@ -160,6 +160,7 @@ echo.
 
 for %%C in (cmd core fsutils compact proctector mfpkg) do (
     if exist "%disk0p1%\%%C.mcm" (
+        echo. >>"%devices%\mem\memsect1.bat"
         type "%disk0p1%\%%C.mcm" >>"%devices%\mem\memsect1.bat"
         call :loadmodok /%sysDir%/%%C.mcm
     ) else (
@@ -275,6 +276,7 @@ if exist "%userDir%" (
 for %%U in (flashbreak devtools) do (
     if exist "%userMods%\%%U.mfm" (
         echo.
+        echo. >>"%devices%\mem\memsect1.bat"
         type "%userMods%\%%U.mfm" >>"%devices%\mem\memsect1.bat"
         call :loadmodok %%U.mfm
     )
@@ -322,12 +324,6 @@ echo Commands are not case-sensitive.
 
 :prompt
 
-if not exist "%disk0p1%\cmd.mcm" (
-    echo [kernel] ERROR: could not load /%sysDir%/cmd.mcm >>"%logfile%"
-    echo Command line could not be loaded.
-    exit
-)
-
 :: check if a reboot has been enforced
 
 if "%enforcereboot%" == "true" (
@@ -355,23 +351,11 @@ if exist "%toggles%\showdir" (
     echo.
 )
 
-:: Reset last run command variable
-
-set "input="
-set "command="
-
-:: receive input from the user:
-
-echo.
-
-echo [cmd] INFO: load user prompt >>"%logfile%"
-echo [cmd] INFO: waiting for user input >>"%logfile%"
-
-set /p "input=%user%@%userdomain%: "
-
-if "%input%" == getvars (set)
-
-:: let memsect1 deal with it
+if not exist "%devices%\mem\memsect1.bat" (
+    echo [kernel] ERROR: could not load memsect1 >>"%logfile%"
+    echo memsect1 could not be loaded.
+    exit
+)
 
 call "%devices%\mem\memsect1.bat"
 

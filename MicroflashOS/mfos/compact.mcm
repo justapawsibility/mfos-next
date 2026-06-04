@@ -1,3 +1,5 @@
+:: Consolidated commands [compact.mcm]
+
 :pauseexit
 call :halt
 exit

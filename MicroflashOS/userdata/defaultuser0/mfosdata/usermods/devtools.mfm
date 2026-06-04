@@ -1,4 +1,4 @@
-:: DevTools
+:: MicroflashOS Developer Tools [devtools.mfm]
 
 :mountsys
 title MicroflashOS System Partition Mounter

@@ -1,0 +1,27 @@
+:mountvirt
+if not exist "%userMods%/devtools.mfm" (goto nodev)
+title Virtual System Disk Mounter
+if "%1"=="" (
+    echo This command is used to mount a "virtual system disk".
+    echo These can be obtained with the dumper, installable via pID 005.
+    echo.
+    echo Usage:
+    echo.
+    echo mountvirt [disk name]
+    echo.
+    echo Note: Virtual system disks must be in the same location as the Batch file!
+    goto :eof
+)
+if not exist "%mfosLocation%%1" (
+    echo System disk not found.
+    goto :eof
+)
+set "disk0Label=%1"
+echo Mounted virtual disk.
+set "enforcereboot=true"
+goto :eof
+
+:nodev
+echo DevTools not found. Install pID 001.
+echo [cmd] ERROR: required dependency "DevTools" is missing >>"%logfile%"
+goto :eof
