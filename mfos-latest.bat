@@ -9,7 +9,7 @@ set "mfosLocation=%~dp0"
 
 :: Define some version strings
 
-set "mfosVer=2026.06.09"
+set "mfosVer=2026.06.10"
 set "fbVer=5.2"
 
 :: Define default directories
