@@ -2,7 +2,7 @@
 
 :parser
 
-set "cmdlist=about help clock clear reboot shutdown mkdir rename delete list cd home homewipe mfpkg mountsys modules toggles"
+set "cmdlist=about help clock clear reboot shutdown mkdir rename delete list cd home homewipe mfpkg mountsys modules toggles getvars print"
 
 set "input="
 set "command="
@@ -11,8 +11,6 @@ echo [cmd] INFO: load user prompt >>"%logfile%"
 echo [cmd] INFO: waiting for user input >>"%logfile%"
 echo.
 set /p "input=%user%@%userdomain%: "
-
-if "%input%" == getvars (set)
 
 title Processing command...
 echo [cmd] INFO: received command "%input%" >>"%logfile%"

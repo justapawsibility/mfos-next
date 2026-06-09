@@ -1,51 +1,23 @@
 :: MicroflashOS Core Utilities [core.mcm]
 
 :help
-echo System utilities:
+:: this is so the log message doesn't get blown up
+set "curdir=%cd%"
+cd /d "%pkgHelp%"
+echo ---- help sections start here ----
 echo.
-echo about: Show some system info
-echo clock: Print current date and time
-echo clear: Clear console output
-echo.
-echo Power options:
-echo.
-echo reboot [recovery]: Reboot
-echo shutdown: Power off
-echo.
-echo [help] INFO: load help section for core.mcm >>"%logfile%"
-if exist "%disk0p1%\fsutils.mcm" (
-    echo File management:
-    echo.
-    echo mkdir [directory]: Create a directory
-    echo rename [target] [new name] Rename something to another thing
-    echo delete [file/directory] [name]: Delete a file/directory
-    echo list: List available files/directories
-    echo cd [path]: Change to a directory
-    echo.
-    echo User management
-    echo.
-    echo home: Quickly return to user directory
-    echo homewipe: Wipe all user directories
-    echo [help] INFO: load help section for fsutils.mcm >>"%logfile%"
+for %%i in ("*.mhs") do (
+    type "%%i"
+	echo [help] INFO: load help section %%i >>"%logfile%"
+	echo.
 )
-if exist "%disk0p1%\mfpkg.mcm" (
-    echo.
-    echo Package management:
-    echo.
-    echo mfpkg list: Show installed packages
-    echo mfpkg run [package]: Run an installed package
-    echo [help] INFO: load help section for mfpkg.mcm >>"%logfile%"
-)
-if exist "%userMods%\devtools.mfm" (
-    echo.
-    echo Developer commands:
-    echo.
-    echo mountsys: Mount and modify system disk contents
-    echo modules: List all core and user modules
-    echo toggles [create/delete/enabled/list] [toggle]: Manage toggles
-    echo getvars: Print a list of ALL environment variables accessible
-    echo [help] INFO: load help section for devtools.mfm >>"%logfile%"
-)
+cd /d "%curdir%"
+echo ----- help sections end here -----
+goto :eof
+
+:print
+echo [print] INFO: user input: "%*" >>""%logfile%"
+echo %*
 goto :eof
 
 :about
@@ -83,6 +55,6 @@ goto :eof
 :clear
 if not exist "%toggles%\noclear" (
     cls
-    echo [cmd] INFO: user requested shell clearance >>"%logfile%"
+    echo [cmd] INFO: clearing shell >>"%logfile%"
 )
 goto :eof

@@ -1,0 +1,12 @@
+File management:
+
+mkdir [directory]: Create a directory
+rename [target] [new name] Rename something to another thing
+delete [file/directory] [name]: Delete a file/directory
+list: List available files/directories
+cd [path]: Change to a directory
+
+User management:
+
+home: Quickly return to user directory
+homewipe: Wipe all user directories

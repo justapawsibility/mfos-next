@@ -12,7 +12,7 @@ set "mfosLocation=%~dp0"
 
 :: Define some version strings
 
-set "mfosVer=2026.06.05"
+set "mfosVer=2026.06.09"
 set "fbVer=5.2"
 set "pkgRepo=GigaflashOS Unified Repository [Revision 3]"
 
@@ -44,13 +44,14 @@ set "disk0p2=%disk0%\%userData%"
 :: Special directories
 
 set "devices=%disk0p1%\devices"
-set "exeCache=%devices%\mem\memsect2\execache"
+set "exeCache=%devices%\memsect2\execache"
 set "userDir=%disk0p2%\%user%"
 set "userSysDatadir=%userDir%\%userSysData%"
 set "toggles=%userSysDatadir%\toggles"
 set "userMods=%userSysDatadir%\%modsDir%"
 set "pkgDir=%userSysDatadir%\packages"
 set "pkgMeta=%pkgDir%\installed"
+set "pkgHelp=%pkgDir%\help"
 
 :: Startup parameters
 
@@ -70,7 +71,7 @@ echo [bootloader] INFO: log file: %logfile%
 
 if exist "%toggles%\slowboot" (call :slowboot)
 
-:: Transfer control to kernel
+:: Transfer control to kernel (lore stuff)
 
 echo [bootloader] INFO: loading bundled kernel into memory... >>"%logfile%"
 echo [kernel] INFO: hello world, my version is %mfosVer% >>"%logfile%"
@@ -121,28 +122,19 @@ echo Initializing devices...
 echo.
 
 if not exist "%devices%" (cd /d "%disk0p1%" && md devices)
-if not exist "%devices%\mem" (cd /d "%devices%" && md mem)
 
-:: insert redirector thing to memsect1
-
-::echo call %%1 >"%devices%/mem/memsect1.bat"
-::echo goto :eof >>"%devices%/mem/memsect1.bat"
-
-echo ^:^: Memory Sector 1 >"%devices%\mem\memsect1.bat"
-if not exist "%devices%\mem\memsect1.bat" (call :devinitfail memsect1)
+echo ^:^: Memory Sector 1 >"%devices%\memsect1.bat"
+if not exist "%devices%\memsect1.bat" (call :devinitfail memsect1)
 call :devinitok memsect1
 
-cd /d "%devices%\mem"
-
-if not exist "%devices%\mem\memsect2" (md memsect2)
-if not exist "%devices%\mem\memsect2" (call :devinitfail memsect2)
-cd memsect2
-if not exist "%exeCache%" (mkdir execache)
+if not exist "%devices%\memsect2" (md "%devices%\memsect2")
+if not exist "%devices%\memsect2" (call :devinitfail memsect2)
+if not exist "%exeCache%" (mkdir "%devices%\memsect2\execache")
 if not exist "%exeCache%" (call :devinitfail memsect2)
 call :devinitok memsect2
 
-echo Memory sector 3 - Secret Block>"%devices%\mem\memsect3"
-if not exist "%devices%\mem\memsect3" (call :devinitfail memsect3)
+echo Memory sector 3 - Secret Block>"%devices%\memsect3"
+if not exist "%devices%\memsect3" (call :devinitfail memsect3)
 call :devinitok memsect3
 
 if exist "%toggles%\slowboot" (call :slowboot)
@@ -160,8 +152,8 @@ echo.
 
 for %%C in (cmd core fsutils compact proctector mfpkg) do (
     if exist "%disk0p1%\%%C.mcm" (
-        echo. >>"%devices%\mem\memsect1.bat"
-        type "%disk0p1%\%%C.mcm" >>"%devices%\mem\memsect1.bat"
+        echo. >>"%devices%\memsect1.bat"
+        type "%disk0p1%\%%C.mcm" >>"%devices%\memsect1.bat"
         call :loadmodok /%sysDir%/%%C.mcm
     ) else (
         call :loadmodfail /%sysDir%/%%C.mcm
@@ -276,8 +268,8 @@ if exist "%userDir%" (
 for %%U in (flashbreak devtools) do (
     if exist "%userMods%\%%U.mfm" (
         echo.
-        echo. >>"%devices%\mem\memsect1.bat"
-        type "%userMods%\%%U.mfm" >>"%devices%\mem\memsect1.bat"
+        echo. >>"%devices%\memsect1.bat"
+        type "%userMods%\%%U.mfm" >>"%devices%\memsect1.bat"
         call :loadmodok %%U.mfm
     )
 )
@@ -300,11 +292,6 @@ if exist "%toggles%\slowboot" (call :slowboot)
 
 if not exist "%toggles%\noclear" (cls)
 echo.
-if not exist "%disk0p1%\cmd.mcm" (
-    echo [kernel] ERROR: could not load /%sysDir%/cmd.mcm >>"%logfile%"
-    echo Command line could not be loaded.
-    goto pauseexit
-)
 echo Welcome to MicroflashOS!
 echo [cmd] INFO: initialized prompt >>"%logfile%"
 echo.
@@ -351,17 +338,18 @@ if exist "%toggles%\showdir" (
     echo.
 )
 
-if not exist "%devices%\mem\memsect1.bat" (
+if not exist "%devices%\memsect1.bat" (
     echo [kernel] ERROR: could not load memsect1 >>"%logfile%"
-    echo memsect1 could not be loaded.
+	echo.
+    echo FATAL: Memory Sector 1 failure!
+	call :halt
     exit
 )
 
-call "%devices%\mem\memsect1.bat"
-
+call "%devices%\memsect1.bat"
 goto prompt
 
-:: Boot process
+:: Consolidations
 
 :bootfail
 echo.
@@ -403,8 +391,6 @@ echo Slowboot toggle tripped!
 call :halt
 echo [bootloader] DEBUG: slowboot toggle tripped >>"%logfile%"
 goto :eof
-
-:: Common pause and exit functions
 
 :pauseexit
 call :halt

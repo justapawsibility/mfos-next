@@ -1,0 +1,6 @@
+Developer commands:
+
+mountsys: Mount and modify system disk contents
+modules: List all core and user modules
+toggles [create/delete/enabled/list] [toggle]: Manage toggles
+getvars: Print a list of ALL environment variables accessible
