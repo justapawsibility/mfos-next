@@ -328,10 +328,6 @@ if "%enforcereboot%" == "true" (
 set "titlebar=MicroflashOS %mfosVer%"
 title %titlebar%
 if exist "%userMods%\devtools.mfm" (title %titlebar% [DevTools])
-if "%fbloaded%"=="yessir" (
-    title %titlebar% [DevTools] [F145HBR34K %fbVer%]
-    echo [flashbreak] INFO: modified titlebar >>"%logfile%"
-)
 
 if exist "%toggles%\showdir" (
     echo [cmd] DEBUG: showing current directory >>"%logfile%"

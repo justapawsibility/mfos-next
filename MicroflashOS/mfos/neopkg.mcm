@@ -16,7 +16,10 @@ if "%1"=="install" (
     )
     setlocal enabledelayedexpansion
     call :curlcheck
-    if "%curlfound%"=="nope" (goto :eof)
+    if "%curlfound%"=="nope" (
+        set "curlfound='
+        goto :eof
+    )
     set "error="
     set "pkgLink=https://raw.githubusercontent.com/knbn1/mfos-next-packages/refs/heads/main/%2.mfp"
     set "pkgFile=%pkgDir%\%2.mfp"
