@@ -1,6 +1,7 @@
 :: GHETTO SCRIPTED BY PAWS
 
 :cowsay
+
 setlocal EnableExtensions EnableDelayedExpansion
 
 :: ask for user input

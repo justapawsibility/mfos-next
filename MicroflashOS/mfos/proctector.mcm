@@ -1,6 +1,7 @@
 :: MicroflashOS Proctector [proctector.mcm]
 
 :proctector
+title MicroflashOS Proctector User Authorization
 echo [proctector] INFO: requesting user authorization >>"%logfile%"
 set /p "confirmation=Type "CONFIRM" (case-sensitive) to confirm this action: "
 if "%confirmation%" == "CONFIRM" (

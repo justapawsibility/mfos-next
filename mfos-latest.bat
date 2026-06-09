@@ -189,7 +189,7 @@ if not exist "%disk0p2%" (
 )
 
 :: the bare minimum to get stuff to work
-:: if mfos breaks you will still need to download the latest system disks from github
+:: if mfos breaks you will need to download the latest system disks from github
 
 if not exist "%userDir%" (
     echo Userdata for user %user% not found!
@@ -346,23 +346,13 @@ if not exist "%devices%\memsect1.bat" (
 	goto pauseexit
 )
 
-:: Immediately jump to memory sector 1 and parse stuff
+:: Immediately jump to memory sector 1 to parse commands
+:: Potential scripting support soon??
 
 call "%devices%\memsect1.bat"
 goto prompt
 
 :: Consolidations
-
-:bootfail
-echo.
-title Startup Failure!
-echo MicroflashOS startup failed.
-goto pauseexit
-
-:devinitfail
-echo Could not initialize device "%1"
-echo [kdevinit] ERROR: failed to initialize "%1" >>"%logfile%"
-goto bootfail
 
 :devinitok
 echo Initialized %1
@@ -374,11 +364,22 @@ echo Loaded %1
 echo [kmodsinit] INFO: loaded %1 >>"%logfile%"
 goto :eof
 
+:devinitfail
+echo Could not initialize device "%1"
+echo [kdevinit] ERROR: failed to initialize "%1" >>"%logfile%"
+goto bootfail
+
 :loadmodfail
 echo.
 echo FAIL %1
 echo [kmodsinit] ERROR: failed to load %1 >>"%logfile%"
 goto bootfail
+
+:bootfail
+echo.
+title Startup Failure!
+echo MicroflashOS startup failed.
+goto pauseexit
 
 :slowboot
 echo.

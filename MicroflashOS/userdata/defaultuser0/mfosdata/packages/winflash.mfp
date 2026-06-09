@@ -1,5 +1,4 @@
 :winflash
-title WinFlash
 cls
 echo Type EXIT and press Enter to return to MicroflashOS.
 echo.

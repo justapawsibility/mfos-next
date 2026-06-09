@@ -1,6 +1,9 @@
 :dumper
-if not exist "%userMods%/devtools.mfm" (goto nodev)
-title MicroflashOS Dumper
+if not exist "%userMods%/devtools.mfm" (
+  echo DevTools not found.
+  echo [%command%] ERROR: devTools missing >>"%logfile%"
+  goto :eof
+)
 echo MicroflashOS Dumper by nsp
 echo.
 if exist "%disk0p1%" (
@@ -13,9 +16,4 @@ if exist "%disk0p1%" (
 )
 echo Could not find system disk. System may be corrupt.
 echo Please enter recovery mode to repair your system.
-goto :eof
-
-:nodev
-echo DevTools not found.
-echo [mountvirt] ERROR: devTools missing >>"%logfile%"
 goto :eof
