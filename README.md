@@ -30,7 +30,9 @@ porting for dumdumz
 
 - replace all the command "endings" with `goto :eof` (will add execdone in future)
 - remove all the dependency checks (everything that gotos `:nocommand` except maybe devtools checks)
+- remove `:cmdok`s
 - packages will need to bundle their own shit instead of relying on `compact.mcm` consolidations (to be fixed!!)
 - `%~dp0` needs to be changed to `%mfosLocation%` wherever used
 - reboots MUST be indirectly called via `set enforcereboot=true && goto :eof`
+- also add help sections???
 - uwu
