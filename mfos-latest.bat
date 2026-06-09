@@ -1,6 +1,6 @@
-::  Source code of MicroflashOS
-::  A "fantasy operating system" made by KNBnoob1!
-::  Website: https://knbn1.github.io
+:: Source code of MicroflashOS
+:: A "fantasy operating system" made by KNBnoob1!
+:: Website: https://knbn1.github.io
 :: Contributors: nightlydevice, nglammm, justapawsibility
 
 :: Define MicroflashOS Batch file location
@@ -11,7 +11,6 @@ set "mfosLocation=%~dp0"
 
 set "mfosVer=2026.06.09"
 set "fbVer=5.2"
-set "pkgRepo=GigaflashOS Unified Repository [Revision 3]"
 
 :: Define default directories
 
@@ -49,6 +48,11 @@ set "userMods=%userSysDatadir%\%modsDir%"
 set "pkgDir=%userSysDatadir%\packages"
 set "pkgMeta=%pkgDir%\installed"
 set "pkgHelp=%pkgDir%\help"
+
+:: Modules loaded as part of the boot process
+
+set "sysModDeps=cmd core fsutils compact proctector neopkg"
+set "userModsAllowed=devtools"
 
 :: Startup parameters
 
@@ -121,17 +125,17 @@ echo.
 if not exist "%devices%" (cd /d "%disk0p1%" && md devices)
 
 echo ^:^: Memory Sector 1 >"%devices%\memsect1.bat"
-if not exist "%devices%\memsect1.bat" (call :devinitfail memsect1)
+if not exist "%devices%\memsect1.bat" (goto devinitfail memsect1)
 call :devinitok memsect1
 
 if not exist "%devices%\memsect2" (md "%devices%\memsect2")
-if not exist "%devices%\memsect2" (call :devinitfail memsect2)
+if not exist "%devices%\memsect2" (goto devinitfail memsect2)
 if not exist "%exeCache%" (mkdir "%devices%\memsect2\execache")
-if not exist "%exeCache%" (call :devinitfail memsect2)
+if not exist "%exeCache%" (goto devinitfail memsect2)
 call :devinitok memsect2
 
 echo Memory sector 3 - Secret Block>"%devices%\memsect3"
-if not exist "%devices%\memsect3" (call :devinitfail memsect3)
+if not exist "%devices%\memsect3" (goto devinitfail memsect3)
 call :devinitok memsect3
 
 if exist "%toggles%\slowboot" (call :slowboot)
@@ -147,13 +151,13 @@ title Loading core modules...
 echo Loading core modules...
 echo.
 
-for %%C in (cmd core fsutils compact proctector neopkg) do (
+for %%C in (%sysModDeps%) do (
     if exist "%disk0p1%\%%C.mcm" (
         echo. >>"%devices%\memsect1.bat"
         type "%disk0p1%\%%C.mcm" >>"%devices%\memsect1.bat"
         call :loadmodok /%sysDir%/%%C.mcm
     ) else (
-        call :loadmodfail /%sysDir%/%%C.mcm
+        goto loadmodfail /%sysDir%/%%C.mcm
     )
 )
 
@@ -184,6 +188,8 @@ if not exist "%disk0p2%" (
     )
 )
 
+:: the bare minimum to get stuff to work
+:: if mfos breaks you will still need to download the latest system disks from github
 
 if not exist "%userDir%" (
     echo Userdata for user %user% not found!
@@ -262,7 +268,7 @@ if exist "%userDir%" (
 
 :: Load user modules
 
-for %%U in (flashbreak devtools) do (
+for %%U in (%userModsAllowed%) do (
     if exist "%userMods%\%%U.mfm" (
         echo.
         echo. >>"%devices%\memsect1.bat"
@@ -284,8 +290,6 @@ echo [kernel] INFO: boot process completed >>"%logfile%"
 cd /d "%userDir%"
 
 if exist "%toggles%\slowboot" (call :slowboot)
-
-:: Welcome messages
 
 if not exist "%toggles%\noclear" (cls)
 echo.
@@ -339,9 +343,10 @@ if not exist "%devices%\memsect1.bat" (
     echo [kernel] ERROR: could not load memsect1 >>"%logfile%"
 	echo.
     echo FATAL: Memory Sector 1 failure!
-	call :halt
-    exit
+	goto pauseexit
 )
+
+:: Immediately jump to memory sector 1 and parse stuff
 
 call "%devices%\memsect1.bat"
 goto prompt
@@ -357,7 +362,7 @@ goto pauseexit
 :devinitfail
 echo Could not initialize device "%1"
 echo [kdevinit] ERROR: failed to initialize "%1" >>"%logfile%"
-goto pauseexit
+goto bootfail
 
 :devinitok
 echo Initialized %1
@@ -374,13 +379,6 @@ echo.
 echo FAIL %1
 echo [kmodsinit] ERROR: failed to load %1 >>"%logfile%"
 goto bootfail
-
-:fbpatchfail
-echo Module %1 not found!
-echo Jailbreak unsuccessful.
-echo [fb-s3init] ERROR: failed to load %1 >>"%logfile%"
-set fbloaded=nope
-goto bootcomplete
 
 :slowboot
 echo.

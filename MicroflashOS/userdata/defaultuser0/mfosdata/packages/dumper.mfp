@@ -16,6 +16,6 @@ echo Please enter recovery mode to repair your system.
 goto :eof
 
 :nodev
-echo DevTools not found. Install pID 001.
-echo [cmd] ERROR: required dependency "DevTools" is missing >>"%logfile%"
+echo DevTools not found.
+echo [mountvirt] ERROR: devTools missing >>"%logfile%"
 goto :eof

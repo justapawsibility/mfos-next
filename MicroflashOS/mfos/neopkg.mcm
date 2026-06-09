@@ -20,7 +20,7 @@ if "%1"=="install" (
     set "pkgLink=https://raw.githubusercontent.com/knbn1/mfos-next-packages/refs/heads/main/%2.mfp"
     set "pkgFile=%pkgDir%\%2.mfp"
     set "curlErr=%pkgDir%\curl-error.txt"
-    echo Downloading package %2 ...
+    echo Downloading package %2
     echo [neopkg] INFO: downloading package %2 from !pkgLink! >>"%logfile%"
     echo.
     curl --show-error --fail --silent --output "!pkgFile!" "!pkgLink!" 2>"!curlErr!"
@@ -32,7 +32,7 @@ if "%1"=="install" (
         echo Package name: "%2" >"%pkgMeta%\%2"
         echo Installed from !pkgLink! >>"%pkgMeta%\%2"
         echo [neopkg] INFO: generated metadata file >>"%logfile%"
-        echo Installed package %2 successfully.
+        echo Installed package %2.
         del /f /q "!curlErr!"
         goto :eof
     ) else (
@@ -123,8 +123,9 @@ if "%1"=="run" (
 )
 echo MicroflashOS Next Package Manager (neopkg)
 echo.
-echo neopkg [install/uninstall/info] [package]: Manage a package.
+echo neopkg [install/uninstall] [package]: Manage a package.
 echo neopkg list: List installed packages
+echo neopkg info [package]: Get metadata for a package
 echo.
 echo Packages are downloaded from https://github.com/knbn1/mfos-next-packages
 goto :eof

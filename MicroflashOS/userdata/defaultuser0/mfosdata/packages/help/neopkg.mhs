@@ -1,4 +1,5 @@
 Package management:
 
-neopkg list: Show installed packages
-neopkg run [package]: Run an installed package
+neopkg [install/uninstall] [package]: Manage a package
+neopkg list: List installed packages
+neopkg info [package]: Get metadata for a package
