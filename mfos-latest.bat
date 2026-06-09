@@ -1,10 +1,7 @@
 ::  Source code of MicroflashOS
 ::  A "fantasy operating system" made by KNBnoob1!
 ::  Website: https://knbn1.github.io
-
 :: Contributors: nightlydevice, nglammm, justapawsibility
-
-@echo off
 
 :: Define MicroflashOS Batch file location
 
@@ -55,7 +52,7 @@ set "pkgHelp=%pkgDir%\help"
 
 :: Startup parameters
 
-if exist "%toggles%\echoon" (@echo on)
+if exist "%toggles%\echoon" (@echo on) else (@echo off)
 if not exist "%toggles%\noclear" (cls)
 if not exist "%toggles%\nolog" (set "logfile=%mfosLocation%mfos-log.txt") else (set "logfile=NUL")
 if not exist "%toggles%\incognito" (set "history=%userDir%/mfos-history.txt") else (set "history=NUL")

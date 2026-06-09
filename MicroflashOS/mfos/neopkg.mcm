@@ -5,29 +5,39 @@
 
 :: downloader
 
-call :curlcheck
-set "pkgLink=https://raw.githubusercontent.com/knbn1/mfos-next-packages/refs/heads/main/%1.mfp"
-set "pkgFile=%pkgDir%\%1.mfp"
-set "curlErr=%pkgDir%\curl-error.txt"
-echo Downloading package %1...
-echo [neopkg] INFO: downloading package %1 from %pkgLink% >>"%logfile%"
-echo.
-curl --show-error --fail --silent --output "%pkgFile%" "%pkgLink%" 2>"%curlErr%"
-if "%errorlevel%"=="0" (
-    echo Downloaded package %1
-    echo [neopkg] INFO: downloaded %1 successfully >>"%logfile%"
-    del /f /s "%curlErr%"
-    goto :eof
-) else (
-    echo Failed to download package!
+if "%1"=="install" (
+    if "%2"=="" (
+        echo Input a package name.
+        echo [neopkg] ERROR: package name empty! >>"%logfile%"
+        goto :eof
+    )
+    setlocal enabledelayedexpansion
+    call :curlcheck
+    set "error="
+    set "pkgLink=https://raw.githubusercontent.com/knbn1/mfos-next-packages/refs/heads/main/%2.mfp"
+    set "pkgFile=%pkgDir%\%2.mfp"
+    set "curlErr=%pkgDir%\curl-error.txt"
+    echo Downloading package %2...
+    echo [neopkg] INFO: downloading package %2 from !pkgLink! >>"%logfile%"
     echo.
-    type "%curlErr%"
-    echo [neopkg] ERROR: curl failed! details: >>"%logfile%"
-    type "%curlErr%" >>"%logfile%"
-    echo [neopkg] ERROR: refer to curl docs for more info >>"%logfile%"
-    del /f /s "%curlErr%"
-    goto :eof
+    curl --show-error --fail --silent --output "!pkgFile!" "!pkgLink!" 2>"!curlErr!"
+    set /p code=<"!curlErr!"
+    if "!code!"=="" (
+        echo Downloaded package %2
+        echo [neopkg] INFO: downloaded %2 successfully >>"%logfile%"
+        del /f /s "!curlErr!"
+        goto :eof
+    ) else (
+        echo Failed to download package.
+        echo.
+        type "!curlErr!"
+        echo [neopkg] ERROR: curl failed with status !error! >>"%logfile%"
+        del /f /s "!curlErr!"
+        goto :eof
+    )
 )
+echo neopkg install [package]: Downloads a package.
+goto :eof
 
 :: curl check
 
@@ -38,15 +48,15 @@ if "%errorlevel%"=="0" (
     goto :eof
 ) else (
     echo curl not found!
-    echo [updater] WARN: curl not found in PATH>>"%logfile%"
+    echo [neopkg] WARN: curl not found in PATH>>"%logfile%"
     echo.
     set /p conf="Install curl via winget? (y/[n]): "
     echo.
     if not "%conf%"=="y" (
-        echo [updater] ERROR: curl installation cancelled. >>"%logfile%"
+        echo [neopkg] ERROR: curl installation cancelled. >>"%logfile%"
         echo curl installation cancelled by user.
         goto :eof
     )
-    echo [updater] INFO: installing curl with Winget >>"%logfile%"
+    echo [neopkg] INFO: installing curl with Winget >>"%logfile%"
     winget install --id curl.curl --accept-source-agreements --accept-package-agreements || goto :eof
 )
