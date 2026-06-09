@@ -1,9 +1,8 @@
 ## wtf???
 
-experimental build of [mfos](https://github.com/knbn1/mfos) 
-buggy and painful to debug
+a new era of [mfos](https://github.com/knbn1/mfos) 
 
-best to treat this as a devkit for future development, it serves no practical use for end users
+close to the first stable release!
 
 pls open an issue or contact knb if you have any questions
 
@@ -13,9 +12,7 @@ also i spent an eternity chasing impossible dreams :c
 
 sysmodules and packages have been split off from the main batch file, allowing for modular development
 
-SHIT WILL HIT THE FUCKING FAN if you try to run stuff from the old OS
-
-also a lot of stuff from the old mfos is not present here like the updater and package installer stuff (some packages are bundled in here as a result)
+SHIT WILL HIT THE FUCKING FAN if you try to run stuff from the old OS (okay maybe we can try a compat mode for this lmao)
 
 ## installing this
 
@@ -36,3 +33,9 @@ porting for dumdumz
 - reboots MUST be indirectly called via `set enforcereboot=true && goto :eof`
 - also add help sections???
 - uwu
+
+## neopkg
+
+say goodbye to motherfuckin pkg we now have `neopkg`
+commands are more or less the same
+now packages are downloaded online! go to the knbn1/mfos-next-packages repo for packages that are available 
