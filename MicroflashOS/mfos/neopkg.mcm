@@ -11,32 +11,124 @@ if "%1"=="install" (
         echo [neopkg] ERROR: package name empty! >>"%logfile%"
         goto :eof
     )
+    if not exist "%pkgDir%" if not exist "%pkgMeta%" (
+        echo Package directories not found!
+        echo [neopkg] ERROR: package directories not found >>"%logfile%"
+        goto :eof
+    )
     setlocal enabledelayedexpansion
     call :curlcheck
     set "error="
     set "pkgLink=https://raw.githubusercontent.com/knbn1/mfos-next-packages/refs/heads/main/%2.mfp"
     set "pkgFile=%pkgDir%\%2.mfp"
     set "curlErr=%pkgDir%\curl-error.txt"
-    echo Downloading package %2...
+    echo Downloading package %2 ...
     echo [neopkg] INFO: downloading package %2 from !pkgLink! >>"%logfile%"
     echo.
     curl --show-error --fail --silent --output "!pkgFile!" "!pkgLink!" 2>"!curlErr!"
     set /p code=<"!curlErr!"
     if "!code!"=="" (
-        echo Downloaded package %2
         echo [neopkg] INFO: downloaded %2 successfully >>"%logfile%"
-        del /f /s "!curlErr!"
+        echo Registering package...
+        echo.
+        echo Package name: "%2" >"%pkgMeta%\%2"
+        echo Installed from !pkgLink! >>"%pkgMeta%\%2"
+        echo [neopkg] INFO: generated metadata file >>"%logfile%"
+        echo Installed package %2 successfully.
+        del /f /q "!curlErr!"
         goto :eof
     ) else (
         echo Failed to download package.
         echo.
         type "!curlErr!"
         echo [neopkg] ERROR: curl failed with status !error! >>"%logfile%"
-        del /f /s "!curlErr!"
+        del /f /q "!curlErr!"
         goto :eof
     )
 )
-echo neopkg install [package]: Downloads a package.
+if "%1"=="uninstall" (
+    if "%2"=="" (
+        echo Input a package name.
+        echo [neopkg] ERROR: package name empty! >>"%logfile%"
+        goto :eof
+    )
+    if not exist "%pkgDir%" if not exist "%pkgMeta%" (
+        echo Package directories not found!
+        echo [neopkg] ERROR: package directories not found >>"%logfile%"
+        goto :eof
+    )
+    if not exist "%pkgDir%\%2.mfp" if not exist "%pkgMeta%\%2" (
+        echo Package not installed.
+        echo [neopkg] ERROR: package not installed >>"%logfile%"
+        goto :eof
+    )
+    echo Uninstalling package...
+    del "%pkgDir%\%2.mfp" /f /q
+    echo.
+    echo Unregistering package...
+    del "%pkgMeta%\%2" /f /q
+    echo.
+    if exist "%pkgDir%\%2.mfp" if exist "%pkgMeta%\%2" (
+        echo Failed to uninstall package!
+        goto :eof
+    )
+    echo Package %2 uninstalled.
+    goto :eof
+)
+if "%1"=="info" (
+    if "%2"=="" (
+        echo Input a package name.
+        echo [neopkg] ERROR: package name empty! >>"%logfile%"
+        goto :eof
+    )
+    if not exist "%pkgDir%" if not exist "%pkgMeta%" (
+        echo Package directories not found!
+        echo [neopkg] ERROR: package directories not found >>"%logfile%"
+        goto :eof
+    )
+    if not exist "%pkgDir%\%2.mfp" if not exist "%pkgMeta%\%2" (
+        echo Package not installed.
+        echo [neopkg] ERROR: package not installed >>"%logfile%"
+        goto :eof
+    )
+    type "%pkgMeta%\%2"
+    goto :eof
+)
+if "%1"=="list" (
+    echo Installed packages:
+    echo.
+    dir /a:-d /b "%pkgMeta%/"
+    echo [neopkg] INFO: listed installed packages >>"%logfile%"
+    goto :eof
+)
+if "%1"=="run" (
+    if "%2"=="" (
+        echo Input a package name.
+        echo [neopkg] ERROR: package name empty! >>"%logfile%"
+        goto :eof
+    )
+    if not exist "%pkgDir%" if not exist "%pkgMeta%" (
+        echo Package directories not found!
+        echo [neopkg] ERROR: package directories not found >>"%logfile%"
+        goto :eof
+    )
+    if not exist "%pkgDir%\%2.mfp" if not exist "%pkgMeta%\%2" (
+        echo Package not installed.
+        echo [neopkg] ERROR: package not installed >>"%logfile%"
+        goto :eof
+    )
+    echo [neopkg] INFO: package "%2.mfp" found, executing >>"%logfile%"
+    type "%pkgDir%\%2.mfp">"%exeCache%\mfp-%2.bat"
+    :: brute force arguments into this
+    call "%exeCache%\mfp-%2.bat" %3 %4 %5 %6 %7 %8 %9
+    goto :eof
+)
+echo MicroflashOS Next Package Manager (neopkg)
+echo.
+echo neopkg [install/uninstall/info] [package]: Manage a package.
+echo neopkg list: List installed packages
+echo.
+echo Packages are downloaded from https://github.com/knbn1/mfos-next-packages
 goto :eof
 
 :: curl check
@@ -60,3 +152,4 @@ if "%errorlevel%"=="0" (
     echo [neopkg] INFO: installing curl with Winget >>"%logfile%"
     winget install --id curl.curl --accept-source-agreements --accept-package-agreements || goto :eof
 )
+

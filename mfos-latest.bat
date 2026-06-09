@@ -147,7 +147,7 @@ title Loading core modules...
 echo Loading core modules...
 echo.
 
-for %%C in (cmd core fsutils compact proctector mfpkg neopkg) do (
+for %%C in (cmd core fsutils compact proctector neopkg) do (
     if exist "%disk0p1%\%%C.mcm" (
         echo. >>"%devices%\memsect1.bat"
         type "%disk0p1%\%%C.mcm" >>"%devices%\memsect1.bat"

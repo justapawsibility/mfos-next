@@ -1,4 +1,0 @@
-Package management:
-
-mfpkg list: Show installed packages
-mfpkg run [package]: Run an installed package

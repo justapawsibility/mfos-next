@@ -1,0 +1,4 @@
+Package management:
+
+neopkg list: Show installed packages
+neopkg run [package]: Run an installed package
