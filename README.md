@@ -37,5 +37,7 @@ porting for dumdumz
 ## neopkg
 
 say goodbye to motherfuckin pkg we now have `neopkg`
-commands are more or less the same
-now packages are downloaded online! go to the knbn1/mfos-next-packages repo for packages that are available 
+
+commands are more or less the same but now packages are downloaded online!
+
+go to the knbn1/mfos-next-packages repo for packages that are available 
