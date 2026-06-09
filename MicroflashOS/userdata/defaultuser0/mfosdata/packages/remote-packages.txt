@@ -1,0 +1,5 @@
+dumper: MicroflashOS firmware dumper by nsp
+winflash: WinFlash compatibility layer for Windows software
+mountvirt [disk name]: Mount and boot to a system disk of your choice
+cowsay: Make a cow say something
+helloworld: Test package

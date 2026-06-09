@@ -16,6 +16,7 @@ if "%1"=="install" (
     )
     setlocal enabledelayedexpansion
     call :curlcheck
+    if "%curlfound%"=="nope" (goto :eof)
     set "error="
     set "pkgLink=https://raw.githubusercontent.com/knbn1/mfos-next-packages/refs/heads/main/%2.mfp"
     set "pkgFile=%pkgDir%\%2.mfp"
@@ -122,11 +123,42 @@ if "%1"=="run" (
     call "%exeCache%\mfp-%2.bat" %3 %4 %5 %6 %7 %8 %9
     goto :eof
 )
+if "%1"=="available" (
+    if not exist "%pkgDir%" if not exist "%pkgMeta%" (
+        echo Package directories not found!
+        echo [neopkg] ERROR: package directories not found >>"%logfile%"
+        goto :eof
+    )
+    call :curlcheck
+    if "%curlfound%"=="nope" (goto :eof)
+    setlocal enabledelayedexpansion
+    set "curlErr=%pkgDir%\curl-error.txt"
+    echo Downloading package list...
+    echo.
+    echo [neopkg] INFO: downloading package list from https://raw.githubusercontent.com/knbn1/mfos-next-packages/refs/heads/main/stuffs/remote-packages.txt >>"%logfile%"
+    :: urls are hardcoded... change these someday
+    curl --show-error --fail --silent --output "%pkgDir%\remote-packages.txt" https://raw.githubusercontent.com/knbn1/mfos-next-packages/refs/heads/main/stuffs/remote-packages.txt 2>"!curlErr!"
+    set /p code=<"!curlErr!"
+    if "!code!"=="" (
+        echo [neopkg] INFO: downloaded package list successfully >>"%logfile%"
+        type "%pkgDir%\remote-packages.txt"
+        del /f /q "!curlErr!"
+        goto :eof
+    ) else (
+        echo Failed to download package list.
+        echo.
+        type "!curlErr!"
+        echo [neopkg] ERROR: curl failed with status !error! >>"%logfile%"
+        del /f /q "!curlErr!"
+        goto :eof
+    )
+)
 echo MicroflashOS Next Package Manager (neopkg)
 echo.
 echo neopkg [install/uninstall] [package]: Manage a package.
 echo neopkg list: List installed packages
 echo neopkg info [package]: Get metadata for a package
+echo neopkg available: Download a list of packages to install
 echo.
 echo Packages are downloaded from https://github.com/knbn1/mfos-next-packages
 goto :eof
@@ -139,6 +171,7 @@ if "%errorlevel%"=="0" (
     echo [neopkg] DEBUG: curl found! >>"%logfile%"
     goto :eof
 ) else (
+    set "curlfound=nope"
     echo curl not found!
     echo [neopkg] WARN: curl not found in PATH>>"%logfile%"
     echo.

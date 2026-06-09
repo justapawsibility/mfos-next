@@ -3,3 +3,4 @@ Package management:
 neopkg [install/uninstall] [package]: Manage a package
 neopkg list: List installed packages
 neopkg info [package]: Get metadata for a package
+neopkg available: Download a list of packages to install
