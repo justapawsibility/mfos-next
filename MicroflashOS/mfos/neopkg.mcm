@@ -1,9 +1,7 @@
 :: MicroflashOS Next Package Manager [neopkg.mcm]
-:: Some code borrowed from the MicroflashOS Updater (https://github.com/knbn1/mfos/blob/main/mfos-latest.bat)
+:: Some code borrowed from the MicroflashOS Updater by nightlydevice and nglammm
 
 :neopkg
-
-:: downloader
 
 if "%1"=="install" (
     if "%2"=="" (
