@@ -1,3 +1,6 @@
 mfos-log.txt
 MicroflashOS/mfos/devices
 MicroflashOS/userdata/defaultuser0/mfos-history.txt
+MicroflashOS/userdata/defaultuser0/mfosdata/toggles
+MicroflashOS/userdata/defaultuser0/mfosdata/packages/remote-packages.txt
+MicroflashOS/userdata/defaultuser0/mfosdata/packages/installed

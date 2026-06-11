@@ -14,13 +14,13 @@ if "%1"=="install" (
         echo [neopkg] ERROR: package directories not found >>"%logfile%"
         goto :eof
     )
-    setlocal enabledelayedexpansion
+    set "curlfound="
     call :curlcheck
     if "%curlfound%"=="nope" (
         set "curlfound='
         goto :eof
     )
-    set "error="
+    setlocal enabledelayedexpansion
     set "pkgLink=https://raw.githubusercontent.com/knbn1/mfos-next-packages/refs/heads/main/%2.mfp"
     set "pkgFile=%pkgDir%\%2.mfp"
     set "curlErr=%pkgDir%\curl-error.txt"
@@ -43,11 +43,12 @@ if "%1"=="install" (
         echo Failed to download package.
         echo.
         type "!curlErr!"
-        echo [neopkg] ERROR: curl failed with status !error! >>"%logfile%"
+        echo [neopkg] ERROR: curl failed: "!curlErr!" >>"%logfile%"
         del /f /q "!curlErr!"
         goto :eof
     )
 )
+
 if "%1"=="uninstall" (
     if "%2"=="" (
         echo Input a package name.
@@ -77,6 +78,7 @@ if "%1"=="uninstall" (
     echo Package %2 uninstalled.
     goto :eof
 )
+
 if "%1"=="info" (
     if "%2"=="" (
         echo Input a package name.
@@ -96,6 +98,7 @@ if "%1"=="info" (
     type "%pkgMeta%\%2"
     goto :eof
 )
+
 if "%1"=="list" (
     echo Installed packages:
     echo.
@@ -103,6 +106,7 @@ if "%1"=="list" (
     echo [neopkg] INFO: listed installed packages >>"%logfile%"
     goto :eof
 )
+
 if "%1"=="run" (
     if "%2"=="" (
         echo Input a package name.
@@ -126,20 +130,25 @@ if "%1"=="run" (
     call "%exeCache%\mfp-%2.bat" %3 %4 %5 %6 %7 %8 %9
     goto :eof
 )
+
 if "%1"=="available" (
     if not exist "%pkgDir%" if not exist "%pkgMeta%" (
         echo Package directories not found!
         echo [neopkg] ERROR: package directories not found >>"%logfile%"
         goto :eof
     )
+    set "curlfound="
     call :curlcheck
-    if "%curlfound%"=="nope" (goto :eof)
+    if "%curlfound%"=="nope" (
+        set "curlfound='
+        goto :eof
+    )
     setlocal enabledelayedexpansion
     set "curlErr=%pkgDir%\curl-error.txt"
     echo Downloading package list...
     echo.
-    echo [neopkg] INFO: downloading package list from https://raw.githubusercontent.com/knbn1/mfos-next-packages/refs/heads/main/stuffs/remote-packages.txt >>"%logfile%"
     :: urls are hardcoded... change these someday
+    echo [neopkg] INFO: downloading package list from https://raw.githubusercontent.com/knbn1/mfos-next-packages/refs/heads/main/stuffs/remote-packages.txt >>"%logfile%"
     curl --show-error --fail --silent --output "%pkgDir%\remote-packages.txt" https://raw.githubusercontent.com/knbn1/mfos-next-packages/refs/heads/main/stuffs/remote-packages.txt 2>"!curlErr!"
     set /p code=<"!curlErr!"
     if "!code!"=="" (
@@ -151,11 +160,12 @@ if "%1"=="available" (
         echo Failed to download package list.
         echo.
         type "!curlErr!"
-        echo [neopkg] ERROR: curl failed with status !error! >>"%logfile%"
+        echo [neopkg] ERROR: curl failed: "!curlErr!" >>"%logfile%"
         del /f /q "!curlErr!"
         goto :eof
     )
 )
+
 echo MicroflashOS Next Package Manager (neopkg)
 echo.
 echo neopkg [install/uninstall] [package]: Manage a package.

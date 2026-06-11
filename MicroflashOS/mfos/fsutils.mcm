@@ -151,30 +151,30 @@ echo This command wipes userdata for all users, both logged out and logged in.
 echo This effectively returns MicroflashOS to a "clean" state.
 echo Back up any data before continuing!
 echo.
-call :userauth
-if "%authorized%" == "true" (
-    echo.
-    if not exist "%disk0p2%" (
-        echo Userdata partition not found!
-        echo [fsutils] ERROR: could not load userdata partition >>"%logfile%"
-        goto :eof
-    )
-    echo Found users:
-    dir /a:d /b "%disk0p2%"
-    echo.
-    echo Wiping userdata...
-    cd /d "%disk0%"
-    rd "%userData%" /s /q
-    if exist "%disk0p2%" (
-        echo.
-        echo Userdata wipe failed!
-        echo [fsutils] ERROR: userdata partition wipe failed >>"%logfile%"
-        goto :eof
-    )
-    echo [fsutils] INFO: userdata wipe successful >>"%logfile%"
-    echo Wipe succeeded.
-    echo.
-    set "enforcereboot=true"
+call :proctector
+if "%authorized%" NEQ "true" (
     goto :eof
 )
+echo.
+if not exist "%disk0p2%" (
+    echo Userdata partition not found!
+    echo [fsutils] ERROR: could not load userdata partition >>"%logfile%"
+    goto :eof
+)
+echo Found users:
+    dir /a:d /b "%disk0p2%"
+echo.
+echo Wiping userdata...
+    cd /d "%disk0%"
+rd "%userData%" /s /q
+if exist "%disk0p2%" (
+    echo.
+    echo Userdata wipe failed!
+    echo [fsutils] ERROR: userdata partition wipe failed >>"%logfile%"
+    goto :eof
+)
+echo [fsutils] INFO: userdata wipe successful >>"%logfile%"
+echo Wipe succeeded.
+echo.
+set "enforcereboot=true"
 goto :eof

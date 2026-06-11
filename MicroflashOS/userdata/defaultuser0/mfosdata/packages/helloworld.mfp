@@ -1,3 +1,0 @@
-:: test package
-echo Hello, World!
-goto :eof

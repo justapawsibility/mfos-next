@@ -53,6 +53,11 @@ set "pkgHelp=%pkgDir%\help"
 set "sysModDeps=cmd core fsutils compact proctector neopkg"
 set "userModsAllowed=devtools"
 
+:: Whitelisted and blacklisted commands
+
+set "cmdlist=about help clock print clear reboot shutdown mkdir rename delete list cd home homewipe neopkg mountsys modules toggles getvars"
+set "disallowed=homewipe"
+
 :: Startup parameters
 
 if exist "%toggles%\echoon" (@echo on) else (@echo off)
@@ -341,7 +346,7 @@ if not exist "%devices%\memsect1.bat" (
 	goto pauseexit
 )
 
-:: Immediately jump to memory sector 1 to parse commands
+:: Immediately jump to memsect1 to parse commands
 :: Potential scripting support soon??
 
 call "%devices%\memsect1.bat"

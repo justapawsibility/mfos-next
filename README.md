@@ -1,8 +1,8 @@
+TODO: write wiki
+
 ## wtf???
 
 a new era of [mfos](https://github.com/knbn1/mfos) 
-
-close to the first stable release!
 
 pls open an issue or contact knb if you have any questions
 

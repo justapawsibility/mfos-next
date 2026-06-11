@@ -2,8 +2,6 @@
 
 :parser
 
-set "cmdlist=about help clock print clear reboot shutdown mkdir rename delete list cd home homewipe neopkg mountsys modules toggles getvars"
-
 set "input="
 set "command="
 
@@ -34,6 +32,21 @@ if "%found%"=="nope" (
 )
 
 echo [cmd] INFO: command valid >>"%logfile%"
+
+:: check blacklist
+
+for %%D in (%disallowed%) do (
+    if not exist "%toggles%\allowdisabled" (
+        if "%command%"=="%%D" (
+            echo [cmd] ERROR: command disabled >>"%logfile%"
+            echo.
+            echo This command has been disabled.
+            echo Create "allowdisabled" toggle to bypass this.
+            goto :eof
+        )
+    )
+)
+
 if not exist "%toggles%/incognito" (echo [valid] "%input%" >>"%history%")
 echo.
 title %command%
