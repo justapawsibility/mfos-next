@@ -1,6 +1,6 @@
-:: Source code of MicroflashOS
+:: Source code of MicroflashOS Next
 :: A "fantasy operating system" made by KNBnoob1!
-:: Website: https://knbn1.github.io
+:: Project source: https://github.com/knbn1/mfos-next
 :: Contributors: nightlydevice, nglammm, justapawsibility
 
 :: Define MicroflashOS Batch file location
@@ -9,7 +9,7 @@ set "mfosLocation=%~dp0"
 
 :: Define version string
 
-set "mfosVer=2026.06.10"
+set "mfosVer=2026.06.11"
 
 :: Define default directories
 
@@ -21,7 +21,7 @@ set "disk0Label=MicroflashOS"
 
 :: default user - defined by Batch environment variable %username%
 
-set user=defaultuser0
+set "user=defaultuser0"
 
 :: Boot process stage 0 - Bootloader
 
