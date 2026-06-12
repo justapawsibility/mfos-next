@@ -1,14 +1,20 @@
 :: MicroflashOS Core Utilities [core.mcm]
 
 :help
-:: this is so the log message doesn't get blown up
+:: the cd commands are so the log messages don't get blown up with paths
 set "curdir=%cd%"
 cd /d "%pkgHelp%"
 echo ---- help sections start here ----
 echo.
 for %%i in ("*.mhs") do (
     type "%%i"
-	echo [help] INFO: load help section %%i >>"%logfile%"
+	echo [help] INFO: load help section %%i from disk0p1 >>"%logfile%"
+	echo.
+)
+cd /d "%pkgDir%\help"
+for %%i in ("*.mhs") do (
+    type "%%i"
+	echo [help] INFO: load help section %%i from disk0p2 >>"%logfile%"
 	echo.
 )
 cd /d "%curdir%"
@@ -60,6 +66,6 @@ goto :eof
 :clear
 if not exist "%toggles%\noclear" (
     cls
-    echo [cmd] INFO: clearing shell >>"%logfile%"
+    echo [cmd] INFO: cleared shell output >>"%logfile%"
 )
 goto :eof

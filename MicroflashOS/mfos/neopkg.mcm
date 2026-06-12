@@ -28,22 +28,23 @@ if "%1"=="install" (
     echo [neopkg] INFO: downloading package %2 from !pkgLink! >>"%logfile%"
     echo.
     curl --show-error --fail --silent --output "!pkgFile!" "!pkgLink!" 2>"!curlErr!"
-    set /p code=<"!curlErr!"
-    if "!code!"=="" (
+    set /p curlout=<"!curlErr!"
+    if "!curlout!"=="" (
         echo [neopkg] INFO: downloaded %2 successfully >>"%logfile%"
         echo Registering package...
         echo.
         echo Package name: "%2" >"%pkgMeta%\%2"
-        echo Installed from !pkgLink! >>"%pkgMeta%\%2"
-        echo [neopkg] INFO: generated metadata file >>"%logfile%"
-        echo Installed package %2.
+        echo Install link: !pkgLink! >>"%pkgMeta%\%2"
+        echo Install date: %time% %date% >>"%pkgMeta%\%2"
+        echo [neopkg] INFO: generated package metadata file >>"%logfile%"
+        echo Installed package %2
         del /f /q "!curlErr!"
         goto :eof
     ) else (
         echo Failed to download package.
         echo.
-        type "!curlErr!"
-        echo [neopkg] ERROR: curl failed: "!curlErr!" >>"%logfile%"
+        echo !curlout!
+        echo [neopkg] ERROR: curl failed: "!curlout!" >>"%logfile%"
         del /f /q "!curlErr!"
         goto :eof
     )
@@ -125,7 +126,7 @@ if "%1"=="run" (
     )
     echo [neopkg] INFO: package "%2.mfp" found, executing >>"%logfile%"
     type "%pkgDir%\%2.mfp">"%exeCache%\mfp-%2.bat"
-    :: brute force arguments into this
+    :: brute force arguments into this lmao
     title %2
     call "%exeCache%\mfp-%2.bat" %3 %4 %5 %6 %7 %8 %9
     goto :eof
@@ -150,8 +151,8 @@ if "%1"=="available" (
     :: urls are hardcoded... change these someday
     echo [neopkg] INFO: downloading package list from https://raw.githubusercontent.com/knbn1/mfos-next-packages/refs/heads/main/stuffs/remote-packages.txt >>"%logfile%"
     curl --show-error --fail --silent --output "%pkgDir%\remote-packages.txt" https://raw.githubusercontent.com/knbn1/mfos-next-packages/refs/heads/main/stuffs/remote-packages.txt 2>"!curlErr!"
-    set /p code=<"!curlErr!"
-    if "!code!"=="" (
+    set /p curlout=<"!curlErr!"
+    if "!curlout!"=="" (
         echo [neopkg] INFO: downloaded package list successfully >>"%logfile%"
         type "%pkgDir%\remote-packages.txt"
         del /f /q "!curlErr!"
@@ -159,8 +160,8 @@ if "%1"=="available" (
     ) else (
         echo Failed to download package list.
         echo.
-        type "!curlErr!"
-        echo [neopkg] ERROR: curl failed: "!curlErr!" >>"%logfile%"
+        echo !curlout!
+        echo [neopkg] ERROR: curl failed: "!curlout!" >>"%logfile%"
         del /f /q "!curlErr!"
         goto :eof
     )

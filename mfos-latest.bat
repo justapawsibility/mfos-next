@@ -46,12 +46,12 @@ set "toggles=%userSysDatadir%\toggles"
 set "userMods=%userSysDatadir%\%modsDir%"
 set "pkgDir=%userSysDatadir%\packages"
 set "pkgMeta=%pkgDir%\installed"
-set "pkgHelp=%pkgDir%\help"
+set "pkgHelp=%disk0p1%\help"
 
 :: Modules loaded as part of the boot process
 
-set "sysModDeps=cmd core fsutils compact proctector neopkg"
-set "userModsAllowed=devtools"
+set "sysModDeps=cmd core fsutils compact proctector neopkg devtools"
+set "userModsAllowed="
 
 :: Whitelisted and blacklisted commands
 
@@ -126,7 +126,13 @@ title Initializing devices...
 echo Initializing devices...
 echo.
 
-if not exist "%devices%" (cd /d "%disk0p1%" && md devices)
+if not exist "%devices%" "%pkgHelp%" (
+    cd /d "%disk0p1%"
+    md devices
+    md help
+)
+echo System partition > "%devices%\disk0p1"
+call :devinitok disk0p1
 
 echo ^:^: Memory Sector 1 >"%devices%\memsect1.bat"
 if not exist "%devices%\memsect1.bat" (goto devinitfail memsect1)
@@ -241,11 +247,13 @@ if not exist "%pkgDir%\" (
     echo Creating package directory...
     echo [kusrinit] INFO: creating package directory for %user% >>"%logfile%"
     cd /d "%userSysDatadir%"
+    :: Hardcoded package directories...
     md packages
     cd /d "%pkgDir%"
     md installed
+    md help
     echo.
-    if not exist "%pkgDir%\" if not exist "%pkgMeta%\" (
+    if not exist "%pkgDir%\" if not exist "%pkgMeta%\" if not exist "%pkgHelp%\" (
         echo Package directory creation failed!
         echo [kusrinit] ERROR: package directory creation for user %user% failed >>"%logfile%"
         goto pauseexit
@@ -280,6 +288,11 @@ for %%U in (%userModsAllowed%) do (
         call :loadmodok %%U.mfm
     )
 )
+
+:: Once finished make a device for disk0p2 aka userdata
+:: Doesn't do jackshit but it's for the lore
+
+echo Userdata partition > "%devices%\disk0p2"
 
 if exist "%toggles%\slowboot" (call :slowboot)
 
