@@ -1,15 +1,18 @@
 :: MicroflashOS Proctector [proctector.mcm]
 
 :proctector
-title MicroflashOS Proctector User Authorization
+set "confirmation="
 set "authorized="
 echo [proctector] INFO: requesting user authorization >>"%logfile%"
-set /p "confirmation=Type "CONFIRM" (case-sensitive) to confirm this action: "
-if "%confirmation%" == "CONFIRM" (
+set /p "confirmation=Type "CONFIRM" to authorize this action: "
+if "%confirmation%"=="CONFIRM" (
     set "confirmation="
     set "authorized=true"
-    echo [proctector] INFO: authorized >>"%logfile%"
+    echo [proctector] INFO: authorized user %user% >>"%logfile%"
+    goto :eof
 ) else (
+    set "confirmation="
+    set "authorized=false"
     echo.
     echo User authorization failed!
     echo [kernel] ERROR: user authorization failed >> "%logfile%"

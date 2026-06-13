@@ -9,7 +9,7 @@ if "%1"=="install" (
         echo [neopkg] ERROR: package name empty! >>"%logfile%"
         goto :eof
     )
-    if not exist "%pkgDir%" if not exist "%pkgMeta%" (
+    if not exist "%pkgDir%" if not exist "%pkgMeta%" if not exist "%exeCache%" (
         echo Package directories not found!
         echo [neopkg] ERROR: package directories not found >>"%logfile%"
         goto :eof
@@ -56,7 +56,7 @@ if "%1"=="uninstall" (
         echo [neopkg] ERROR: package name empty! >>"%logfile%"
         goto :eof
     )
-    if not exist "%pkgDir%" if not exist "%pkgMeta%" (
+    if not exist "%pkgDir%" if not exist "%pkgMeta%" if not exist "%exeCache%" (
         echo Package directories not found!
         echo [neopkg] ERROR: package directories not found >>"%logfile%"
         goto :eof
@@ -86,7 +86,7 @@ if "%1"=="info" (
         echo [neopkg] ERROR: package name empty! >>"%logfile%"
         goto :eof
     )
-    if not exist "%pkgDir%" if not exist "%pkgMeta%" (
+    if not exist "%pkgDir%" if not exist "%pkgMeta%" if not exist "%exeCache%" (
         echo Package directories not found!
         echo [neopkg] ERROR: package directories not found >>"%logfile%"
         goto :eof
@@ -114,7 +114,7 @@ if "%1"=="run" (
         echo [neopkg] ERROR: package name empty! >>"%logfile%"
         goto :eof
     )
-    if not exist "%pkgDir%" if not exist "%pkgMeta%" (
+    if not exist "%pkgDir%" if not exist "%pkgMeta%" if not exist "%exeCache%" (
         echo Package directories not found!
         echo [neopkg] ERROR: package directories not found >>"%logfile%"
         goto :eof
@@ -124,16 +124,42 @@ if "%1"=="run" (
         echo [neopkg] ERROR: package not installed >>"%logfile%"
         goto :eof
     )
-    echo [neopkg] INFO: package "%2.mfp" found, executing >>"%logfile%"
+    echo [neopkg] INFO: package "%2.mfp" found >>"%logfile%"
+    if exist "%exeCache%\mfp-%2.bat" (
+        echo Another instance of this program is already running!
+        echo You may be able to fix this by running this command:
+        echo.
+        echo neopkg clear-cache
+        echo [neopkg] ERROR: package "%2" already present in cache! >>"%logfile%"
+        goto :eof
+    )
     type "%pkgDir%\%2.mfp">"%exeCache%\mfp-%2.bat"
     :: brute force arguments into this lmao
     title %2
     call "%exeCache%\mfp-%2.bat" %3 %4 %5 %6 %7 %8 %9
+    :: delete the cached file we just made
+    del "%exeCache%\mfp-%2.bat" /f /q
+    goto :eof
+)
+
+if "%1"=="clear-cache"
+    if not exist "%pkgDir%" if not exist "%pkgMeta%" if not exist "%exeCache%" (
+        echo Package directories not found!
+        echo [neopkg] ERROR: package directories not found >>"%logfile%"
+        goto :eof
+    )
+    call :proctector
+    if "%authorized%" NEQ "true" (
+        goto :eof
+    )
+    del "%exeCache%\*" /f /q
+    echo Done.
+    echo [neopkg] INFO: cleared neopkg exec cache >>"%logfile%"
     goto :eof
 )
 
 if "%1"=="available" (
-    if not exist "%pkgDir%" if not exist "%pkgMeta%" (
+    if not exist "%pkgDir%" if not exist "%pkgMeta%" if not exist "%exeCache%" (
         echo Package directories not found!
         echo [neopkg] ERROR: package directories not found >>"%logfile%"
         goto :eof
@@ -173,6 +199,7 @@ echo neopkg [install/uninstall] [package]: Manage a package.
 echo neopkg list: List installed packages
 echo neopkg info [package]: Get metadata for a package
 echo neopkg available: Download a list of packages to install
+echo neopkg clear-cache: Clears the executable cache used by neopkg run
 echo.
 echo Packages are downloaded from https://github.com/knbn1/mfos-next-packages
 goto :eof

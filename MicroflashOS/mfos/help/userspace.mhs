@@ -1,0 +1,5 @@
+User management commands.
+
+users [create/delete]: Manage users on device
+users list: List users present
+users switch: Switch to another user

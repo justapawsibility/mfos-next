@@ -2,6 +2,6 @@ I'd like to give some special thanks to people who have contributed to this proj
 
 - [nightlyDevice](https://github.com/nightlyDevice): updater code in [legacy mfos](https://github.com/knbn1/mfos)
 - [nglammm](https://github.com/nglammm): updater code in [legacy mfos](https://github.com/knbn1/mfos)
-- [Paws/Tobi](https://github.com/justapawsibility): [cowsay](https://github.com/knbn1/mfos-next-packages/blob/main/cowsay.mfp) package
+- [Paws/Tobi](https://github.com/justapawsibility): [cowsay](https://github.com/knbn1/mfos-next-packages/blob/main/cowsay.mfp) package and watching me suffer in discord vc
 
 knb

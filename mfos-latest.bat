@@ -9,7 +9,7 @@ set "mfosLocation=%~dp0"
 
 :: Define version string
 
-set "mfosVer=2026.06.12"
+set "mfosVer=2026.06.13"
 
 :: Define default directories
 
@@ -19,9 +19,9 @@ set "userData=userdata"
 set "userSysData=mfosdata"
 set "disk0Label=MicroflashOS"
 
-:: default user - defined by Batch environment variable %username%
+:: Define default user - %username% environment variable
 
-set "user=defaultuser0"
+set "user=%username%"
 
 :: Boot process stage 0 - Bootloader
 
@@ -40,6 +40,7 @@ set "disk0p2=%disk0%\%userData%"
 
 set "devices=%disk0p1%\devices"
 set "exeCache=%devices%\memsect2\execache"
+
 set "userDir=%disk0p2%\%user%"
 set "userSysDatadir=%userDir%\%userSysData%"
 set "toggles=%userSysDatadir%\toggles"
@@ -50,13 +51,13 @@ set "pkgHelp=%disk0p1%\help"
 
 :: Modules loaded as part of the boot process
 
-set "sysModDeps=cmd core fsutils compact proctector neopkg devtools"
+set "sysModDeps=cmd core fsutils compact proctector neopkg devtools userspace"
 set "userModsAllowed="
 
 :: Whitelisted and blacklisted commands
 
-set "cmdlist=about help clock print clear reboot shutdown mkdir rename delete list cd home homewipe neopkg mountsys modules toggles getvars"
-set "disallowed=homewipe"
+set "cmdlist=about help clock print clear reboot shutdown mkdir rename delete list cd home homewipe neopkg mountsys modules toggles getvars users"
+set "disallowed="
 
 :: Startup parameters
 
@@ -126,7 +127,7 @@ title Initializing devices...
 echo Initializing devices...
 echo.
 
-if not exist "%devices%" "%pkgHelp%" (
+if not exist "%devices%" if not exist "%pkgHelp%" (
     cd /d "%disk0p1%"
     md devices
     md help
