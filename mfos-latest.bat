@@ -142,27 +142,33 @@ echo.
 cd /d "%disk0p1%"
 if not exist "%devices%" (
     md devices
-    echo [kernel] INFO: created devices directory in disk0p1 >>"%logfile%"
 )
 if not exist "%pkgHelp%" (
     md help
-    echo [kernel] INFO: created help sections directory in disk0p1 >>"%logfile%"
 )
-echo System partition > "%devices%\disk0p1"
-call :devinitok disk0p1
+if exist "%devices%" "%pkgHelp%" (
+    echo [kdevinit] INFO: found devices directory in disk0p1 >>"%logfile%"
+    echo [kdevinit] INFO: found help sections directory in disk0p1 >>"%logfile%"
+    echo System partition > "%devices%\disk0p1"
+    call :devinitok disk0p1
+) else (goto devinitfail disk0p1)
 
 echo ^:^: Memory Sector 1 >"%devices%\memsect1.bat"
 if not exist "%devices%\memsect1.bat" (goto devinitfail memsect1)
+echo [kdevinit] INFO: generated memsect1 >>"%logfile%"
 call :devinitok memsect1
 
 if not exist "%devices%\memsect2" (md "%devices%\memsect2")
 if not exist "%devices%\memsect2" (goto devinitfail memsect2)
+echo [kdevinit] INFO: generated memsect2 >>"%logfile%"
 if not exist "%exeCache%" (mkdir "%devices%\memsect2\execache")
 if not exist "%exeCache%" (goto devinitfail memsect2)
+echo [kdevinit] INFO: generated memsect2 neopkg execache >>"%logfile%"
 call :devinitok memsect2
 
-echo Memory sector 3 - Secret Block>"%devices%\memsect3"
+echo Memory sector 3 - Secret Block >"%devices%\memsect3"
 if not exist "%devices%\memsect3" (goto devinitfail memsect3)
+echo [kdevinit] INFO: generated memsect3 >>"%logfile%"
 call :devinitok memsect3
 
 if exist "%toggles%\slowboot" (call :slowboot)
@@ -379,7 +385,7 @@ if not exist "%devices%\memsect1.bat" (
 :: Immediately jump to memsect1 to parse commands
 :: Potential scripting support soon??
 
-call "%devices%\memsect1.bat"
+call "%devices%\memsect1.bat" :parser
 goto prompt
 
 :: Consolidations
