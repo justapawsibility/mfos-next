@@ -146,7 +146,7 @@ if not exist "%devices%" (
 if not exist "%pkgHelp%" (
     md help
 )
-if exist "%devices%" "%pkgHelp%" (
+if exist "%devices%" if exist "%pkgHelp%" (
     echo [kdevinit] INFO: found devices directory in disk0p1 >>"%logfile%"
     echo [kdevinit] INFO: found help sections directory in disk0p1 >>"%logfile%"
     echo System partition > "%devices%\disk0p1"
