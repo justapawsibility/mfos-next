@@ -114,6 +114,18 @@ if "%oldver%" == "%mfosVer%" (
     goto bootfail
 )
 
+:: System partition check
+
+if not exist "%disk0p1%" (
+    echo.
+    echo Could not find the system partition!
+    echo Please redownload a system disk from GitHub Releases.
+    echo.
+    echo https://github.com/knbn1/mfos-next/releases/latest
+    echo [kernel] ERROR: no system partition >>"%logfile%"
+    goto bootfail
+)
+
 :: Boot process stage 1 - Initialize devices
 
 :bootstageone
@@ -127,10 +139,14 @@ title Initializing devices...
 echo Initializing devices...
 echo.
 
-if not exist "%devices%" if not exist "%pkgHelp%" (
-    cd /d "%disk0p1%"
+cd /d "%disk0p1%"
+if not exist "%devices%" (
     md devices
+    echo [kernel] INFO: created devices directory in disk0p1 >>"%logfile%"
+)
+if not exist "%pkgHelp%" (
     md help
+    echo [kernel] INFO: created help sections directory in disk0p1 >>"%logfile%"
 )
 echo System partition > "%devices%\disk0p1"
 call :devinitok disk0p1
